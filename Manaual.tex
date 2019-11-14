@@ -1,0 +1,3772 @@
+
+\documentclass[twoside]{article}
+\usepackage[colorlinks,linkcolor=black]{hyperref}
+\usepackage{xeCJK,xunicode}
+\usepackage{fancyhdr}
+\usepackage{amsmath,amsthm}
+\usepackage{listings,xcolor}
+\usepackage{geometry}
+\usepackage{fontspec}
+\setCJKmainfont[BoldFont=Droid Sans Fallback,ItalicFont=Droid Sans Fallback]{Droid Sans Fallback} 
+\setCJKmonofont[BoldFont=Droid Sans Fallback]{Droid Sans Fallback} 
+\setCJKsansfont{Droid Sans Fallback}
+\setsansfont{Ubuntu}
+\setmonofont[Mapping={}]{Ubuntu}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\lstset{
+    language    = c++,
+    breaklines  = true,
+    captionpos  = b,
+    tabsize     = 4,
+    numbers     = left,
+    columns     = fullflexible,
+    keepspaces  = true,
+    commentstyle = \color[RGB]{0,128,0},
+    keywordstyle = \color[RGB]{0,0,255},
+    basicstyle   = \small\ttfamily,
+    rulesepcolor = \color{red!20!green!20!blue!20},
+    showstringspaces = false,
+}
+\title{ACM/ICPC/CCPC Template}
+\author{ZYF}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{ACM/ICPC/CCPC Template, ZYF}
+\begin{document}\small
+\begin{titlepage}
+\begin{center}
+\vspace*{0.5cm}\includegraphics[width=0.75\textwidth]{logo.jpg} \\ [2cm]
+\HRule \\ [1cm]
+\textbf{\Huge{ACM/ICPC Template Manaual}} \\ [0.5cm]
+\HRule \\ [4cm]
+\textbf{\Huge{浙江工商大学}} \\ [1cm]
+\LARGE{肥宅很快乐}
+\vfill
+\Large{\today}
+\end{center}
+\clearpage
+\end{titlepage}
+\tableofcontents\clearpage
+\pagestyle{fancy}
+\lfoot{}
+\cfoot{\thepage}\rfoot{}
+\setcounter{section}{-1}
+\setcounter{page}{1}
+\clearpage\section{头文件}
+\begin{lstlisting}
+// 巨菜的ACMer-Happy233
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+//-----
+typedef double db;
+typedef long long ll;
+typedef unsigned int ui;
+typedef vector<int> vi;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+#define fi first
+#define se second
+#define pw(x) (1ll << (x))
+#define bt(x, k) (((x) >> k) & 1)
+#define sz(x) ((int)(x).size())
+#define all(x) (x).begin(),(x).end()
+#define rep(i, l, r) for(int i=(l);i<(r);++i)
+#define per(i, l, r) for(int i=(r)-1;i>=(l);--i)
+#define mst(t, v, n) memset(t, v, sizeof(decltype(*(t))) * (n))
+#define sf(x) scanf("%d", &(x))
+#ifndef ACM_LOCAL
+#define endl '\n'
+#endif
+
+int main() {
+#ifdef ACM_LOCAL
+    freopen("./data/std.in", "r", stdin);
+    // freopen("./data/std.out", "w", stdout);
+#else
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+#endif
+
+#ifdef ACM_LOCAL
+    auto start = clock();
+#endif
+    int t = 1;
+//    cin >> t;
+    while (t--)
+        solve();
+#ifdef ACM_LOCAL
+    auto end = clock();
+    cerr << "Run Time: " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+#endif
+    return 0;
+}\end{lstlisting}
+\clearpage\section{字串符}
+\subsection{KMP}
+\begin{lstlisting}
+template<class elemType>
+inline void kmp_nxt(elemType &T, vector<int> &nxt) {
+    nxt[0] = -1;
+    for (int i = 1; i < T.size(); i++) {
+        int j = nxt[i - 1];
+        while (j >= 0 && T[i - 1] != T[j]) j = nxt[j];
+        if (j >= 0 && T[i - 1] == T[j]) nxt[i] = j + 1;
+        else nxt[i] = 0;
+    }
+}
+
+template<class elemType>
+inline int kmp_count(elemType &S, elemType &T) {
+    vector<int> nxt(T.size());
+    kmp_nxt(T, nxt);
+    int index, count = 0;
+    for (index = 0; index < S.size(); ++index) {
+        int pos = 0;
+        int iter = index;
+        while (pos < T.size() && iter < S.size()) {
+            if (S[iter] == T[pos]) {
+                ++iter;
+                ++pos;
+            } else {
+                if (pos == 0) ++iter;
+                else pos = nxt[pos - 1] + 1;
+            }
+        }
+        if (pos == T.size() && (iter - index) == T.size()) ++count;
+    }
+    return count;
+}
+
+template<class elemType>
+inline void kmp_next(elemType T[], int count, vector<int> &nxt) {
+    nxt[0] = -1;
+    for (int i = 1; i < count; i++) {
+        int j = nxt[i - 1];
+        while (j >= 0 && T[i - 1] != T[j]) j = nxt[j];
+        if (j >= 0 && T[i - 1] == T[j]) nxt[i] = j + 1;
+        else nxt[i] = 0;
+    }
+}
+
+template<class elemType>
+inline int kmp_count(elemType S[], int c1, elemType T[], int c2) {
+    vector<int> nxt(c2);
+    kmp_nxt(T, c2, nxt);
+    int index, count = 0;
+    for (index = 0; index < c1; ++index) {
+        int pos = 0;
+        int iter = index;
+        while (pos < c2 && iter < c1) {
+            if (S[iter] == T[pos]) {
+                ++iter;
+                ++pos;
+            }
+            else {
+                if (pos == 0) ++iter;
+                else pos = nxt[pos - 1] + 1;
+            }
+        }
+        if (pos == c2 && (iter - index) == c2) ++count;
+    }
+    return count;
+}\end{lstlisting}
+\clearpage\section{动态规划}
+\subsection{01Bag}
+\begin{lstlisting}
+void dp(int n, int m) {
+    // n=物品个数
+    for (int i = 0; i < n; i++) {
+        // m=背包最大容量
+        for (int j = m; j >= wei[i]; j--)
+            // wei=大小 val=价值
+            f[j] = max(f[j], f[j - wei[i]] + val[i]);
+    }
+}
+\end{lstlisting}
+\subsection{BagProblem}
+\begin{lstlisting}
+#define N 1000
+// val=价值 wei=重量 num=数量
+int val[N], wei[N], num[N], f[N];
+// n=种类个数 m=背包最大值
+
+// 01背包
+void dp1(int n, int m) {
+    for (int i = 0; i < n; i++) {
+        for (int j = m; j >= wei[i]; j--)
+            f[j] = max(f[j], f[j - wei[i]] + val[i]);
+    }
+}
+
+// 完全背包
+void dp2(int n, int m) {
+    //初始化看要求
+    for (int i = 0; i <= m; i++) {
+        f[i] = INF;
+    }
+    f[0] = 0;
+    //若要求恰好装满背包，那在初始化时除了f[0]=0其它f[1..V]均=-∞
+    //若没要求背包装满，只希望价格大，初始化时应将f[0..V]=0）
+    for (int i = 0; i < n; i++)
+        for (int j = wei[i]; j <= m; j++)
+            f[j] = max(f[j], f[j - wei[i]] + val[i]);
+}
+
+// 多重背包
+void dp3(int n, int m) {
+    for (int i = 0; i < n; i++)
+        for (int k = 0; k < num[i]; k++)
+            for (int j = m; j >= wei[i]; j--)
+                f[j] = max(f[j], f[j - wei[i]] + val[i]);
+}
+\end{lstlisting}
+\subsection{FullBag}
+\begin{lstlisting}
+/* 
+完全背包问题的特点是，每种物品可以无限制的重复使用，可以选择放或不放。 
+完全背包问题描述： 
+有N物品和一个容量为V的背包。第i件物品的重量是wei[i]，价值是val[i]。 
+*/  
+  
+#include <cstdio>  
+#define INF 0x3fffffff  
+#define N 10047  
+int f[N],val[N],wei[N];  
+int min(int a,int b)  
+{  
+    return x<y?x:y;  
+}  
+int main()  
+{  
+    int t,i,j,k,E,F,m,n;  
+    scanf("%d",&t);  
+    while(t--)  
+    {  
+        scanf("%d%d",&E,&F);  
+        int c = F-E;  
+        for(i = 0 ; i <= c ; i++)  
+            f[i]=INF;  
+        scanf("%d",&n);  
+        for(i = 0 ; i < n ; i++)  
+        {  
+            scanf("%d%d",&val[i],&wei[i]);//val[i]为面额，wei[i]为重量  
+        }  
+        f[0]=0;//因为此处假设的是小猪储钱罐 恰好装满 的情况  
+        //注意初始化（要求恰好装满背包，那么在初始化时除了f[0]为0其它f[1..V]均设为-∞，  
+        //这样就可以保证最终得到的f[N]是一种恰好装满背包的最优解。  
+        //如果并没有要求必须把背包装满，而是只希望价格尽量大，初始化时应该将f[0..V]全部设为0）  
+        for(i =0 ; i < n ; i++)  
+        {  
+            for(j = wei[i] ; j <= c ; j++)  
+            {  
+                f[j] = min(f[j],f[j-wei[i]]+val[i]);//此处求的是最坏的情况所以用min，确定最少的钱,当然最后就用max了，HEHE  
+            }  
+        }  
+        if(f[c] == INF)  
+            printf("This is impossible.\n");  
+        else  
+            printf("The minimum amount of money in the piggy-bank is %d.\n",f[c]);  
+    }  
+    return 0;  
+}  
+//此代码为HDU1114;  \end{lstlisting}
+\subsection{MultiBag}
+\begin{lstlisting}
+//多重背包(MultiplePack): 有N种物品和一个容量为V的背包。  
+//第i种物品最多有n[i]件可用，每件费用是c[i]，价值是w[i]。  
+//求解将哪些物品装入背包可使这些物品的费用总和不超过背包容量，  
+//且价值总和最大。  
+//HDU 2191  
+  
+#include <cstdio>  
+#include <cstring>  
+#define N 247  
+int max(int x,int y){
+    return x>y?x:y;  
+}  
+int main()  {  
+    int t,n,m,i,j,k;  
+    int w[N],pri[N],num[N],f[N];  
+    while(~scanf("%d",&t)){  
+        while(t--){  
+            memset(f,0,sizeof(f));  
+            scanf("%d%d",&n,&m);//n为总金额，m为大米种类  
+            for(i = 0 ; i < m ; i++){  
+                scanf("%d%d%d",&pri[i],&w[i],&num[i]);//num[i]为每种大米的袋数  
+            }  
+            for(i = 0 ; i < m ; i++){  
+                for(k = 0 ; k < num[i] ; k++){  
+                    for(j = n ; j >= pri[i]; j--){  
+                        f[j] = max(f[j],f[j-pri[i]]+w[i]);  
+                    }  
+                }  
+            }  
+            printf("%d\n",f[n]);  
+        }  
+    }  
+    return 0;  
+}  \end{lstlisting}
+\subsection{Maze01}
+\begin{lstlisting}
+struct Maze01 {
+    // 原始01矩阵 1-n 1-m
+    bool a[N][N];
+    // 以(i,j)向上最大高度的最大子矩阵的左右高
+    int l[N][N], r[N][N], h[N][N];
+    // 最大连续前缀1的左端位置, 如果(i,j)为0则ml=j+1
+    int ml[N][N];
+    // 矩阵大小
+    int n, m;
+
+    void prework() {
+        for (int i = 1; i <= m; i++) {
+            l[0][i] = 0;
+            r[0][i] = m;
+        }
+        for (int i = 1; i <= n; i++) {
+            int maxl = 1;
+            int maxr = m;
+            for (int j = 1; j <= m; j++) {
+                if (a[i][j] == 0) {
+                    maxl = j + 1;
+                    h[i][j] = l[i][j] = 0;
+                } else {
+                    h[i][j] = h[i - 1][j] + 1;
+                    l[i][j] = max(maxl, l[i - 1][j]);
+                }
+                ml[i - 1][j] = maxl;
+                ml[i][j] = j + 1;
+            }
+            for (int j = m; j >= 1; --j) {
+                if (a[i][j] == 0) {
+                    maxr = j - 1;
+                    r[i][j] = m;
+                } else {
+                    r[i][j] = min(maxr, r[i - 1][j]);
+                }
+            }
+        }
+    }
+
+    // 单调栈
+    pii st[N];
+
+    int calc() {
+        prework();
+        int ans = 0;
+        for (int i = 1; i <= n; i++) {
+            int top = 0;
+            for (int j = 1; j <= m; j++) {
+                if (h[i][j] == 0) continue;
+                if (top == 0 || st[top] != make_pair(l[i][j], r[i][j])) {
+                    st[++top] = make_pair(l[i][j], r[i][j]);
+                }
+                while (top && st[top].second == j) {
+                    int pos = st[top--].first;
+                    if (pos < ml[i][j]) {
+                        // l[i][j]-r[i][j]为底, h[i][j]为高
+                        // 可以得到所有的唯一子矩阵, 不存在maze1完全属于maze2
+                        ans++;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+} dp;\end{lstlisting}
+\clearpage\section{数据结构}
+\subsection{BTree}
+\begin{lstlisting}
+template<class T>
+
+struct TreeNode {
+    T value;
+    TreeNode *left;
+    TreeNode *right;
+};
+
+template<class T>
+TreeNode<T> *createTree(const T *pre, const T *in, const int len) {
+    TreeNode<T> *t = NULL;
+    if (len > 0) {
+        t = new TreeNode<T>;
+        t->value = pre[0];
+        int index;
+        for (index = 0; index < len; index++) {
+            if (in[index] == pre[0]) {
+                break;
+            }
+        }
+        if (index == len) {
+            index = -1;
+        }
+        t->left = createTree(pre + 1, in, index);
+        t->right = createTree(pre + index + 1, in + index + 1, len - index - 1);
+    }
+    return t;
+}
+
+template<class T>
+int preOrder(TreeNode<T> *root, queue<T> &out) {
+    if (root) {
+        int count = 1;
+        out.push(root->value);
+        count += preOrder(root->left, out);
+        count += preOrder(root->right, out);
+        return count;
+    } else {
+        return 0;
+    }
+}
+
+template<class T>
+int inOrder(TreeNode<T> *root, queue<T> &out) {
+    if (root) {
+        int count = 1;
+        count += inOrder(root->left, out);
+        out.push(root->value);
+        count += inOrder(root->right, out);
+        return count;
+    } else {
+        return 0;
+    }
+}
+
+template<class T>
+void postOrder(TreeNode<T> *root, queue<T> &out) {
+    if (root) {
+        postOrder(root->left, out);
+        postOrder(root->right, out);
+        out.push(root->value);
+    } else {
+        return;
+    }
+}
+
+template<class T>
+T *convertQueueToArray(queue<T> &out, int len) {
+    T *list = new T[len];
+    int now = 0;
+    while (!out.empty() && now < len) {
+        list[now] = out.front();
+        out.pop();
+        now++;
+    }
+    return list;
+}
+
+template<class T>
+void destroyTree(TreeNode<T> *root) {
+    if (root) {
+        destroyTree(root->left);
+        destroyTree(root->right);
+        delete root;
+    } else return;
+}
+
+template<class T>
+void insertIntoBSTree(TreeNode<T> *root, const T &value) {
+    if (!root) {
+        return;
+    }
+    if (value < root->value) {
+        if (root->left) {
+            insertIntoTree(root->left, value);
+        } else {
+            root->left = new TreeNode<T>;
+            root->left->value = value;
+            root->left->left = NULL;
+            root->left->right = NULL;
+        }
+    } else if (value > root->value) {
+        if (root->right) {
+            insertIntoTree(root->right, value);
+        } else {
+            root->right = new TreeNode<T>;
+            root->right->value = value;
+            root->right->left = NULL;
+            root->right->right = NULL;
+        }
+    }
+}
+
+template<class T>
+TreeNode<T> *createBSTree(T *list, int len) {
+    if (len < 1) {
+        return NULL;
+    }
+    TreeNode<T> *root = new TreeNode<char>;
+    root->value = list[0];
+    root->left = NULL;
+    root->right = NULL;
+    for (int i = 1; i < len; i++) {
+        insertIntoBSTree(root, list[i]);
+    }
+    return root;
+}\end{lstlisting}
+\subsection{pbds-bbtree}
+\begin{lstlisting}
+// RBTree 红黑树
+#include <ext/pb_ds/tree_policy.hpp>
+#include <ext/pb_ds/assoc_container.hpp>
+// 红黑树
+__gnu_pbds::tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> t;
+// null_type无映射(低版本g++为null_mapped_type)
+// 类似multiset
+__gnu_pbds::tree<int, null_type, less_equal<int>, rb_tree_tag, tree_order_statistics_node_update> t;
+find_by_order(size_t order);
+// 结点更新
+tree_order_statistics_node_update
+insert(p);
+erase(it);
+// 求k在树中是第几大:
+order_of_key(p);
+// 找到第order小的迭代器
+find_by_order(order);
+// 前驱
+lower_bound(p);
+// 后驱
+upper_bound(p);
+// 合并
+a.join(b);
+// 分割 key小于等于v的元素属于a，其余的属于b
+a.split(v, b);
+
+// 优先队列
+#include <ext/pb_ds/priority_queue.hpp>
+#include <ext/pb_ds/assoc_container.hpp>
+// 操作类似于stl的优先队列
+typedef __gnu_pbds::priority_queue<node, greater<node>, __gnu_pbds::thin_heap_tag> heap;
+heap::point_iterator; // 指向元素的指针\end{lstlisting}
+\subsection{树状数组}
+\begin{lstlisting}
+const int N = 1000005;
+struct BITree {
+    int n;
+    ll c[N];
+
+    void init(int _n) {
+        n = _n + 1;
+        memset(c, 0, sizeof(ll) * n);
+    }
+
+    void change(int pos, ll v) {
+        for (int i = pos; i < n; i += i & (-i))
+            c[i] += v;
+    }
+
+    ll query(int x) {
+        ll ans = 0;
+        for (int i = x; i > 0; i -= i & (-i))
+            ans += c[i];
+        return ans;
+    }
+
+    void update(int l, int r, ll v) {
+        change(l, v);
+        change(r + 1, -v);
+    }
+} tree;
+
+// 区间更新区间查询
+struct BITree {
+    int n;
+    ll c[N], d[N];
+
+    void init(int _n) {
+        n = _n + 1;
+        memset(c, 0, sizeof(ll) * n);
+        memset(d, 0, sizeof(ll) * n);
+    }
+
+    void change(int pos, ll v) {
+        for (int i = pos; i < n; i += i & (-i))
+            c[i] += v, d[i] += v * (pos - 1);
+    }
+
+    ll query(int x) {
+        ll ans = 0;
+        for (int i = x; i > 0; i -= i & (-i))
+            ans += x * c[i] - d[i];
+        return ans;
+    }
+
+    void update(int l, int r, ll v) {
+        change(l, v);
+        change(r + 1, -v);
+    }
+
+    ll sum(int l, int r) {
+        return query(r) - query(l - 1);
+    }
+} tree;\end{lstlisting}
+\subsection{二维树状数组}
+\begin{lstlisting}
+const int N = 2005;
+
+inline int lowbit(const int &x) {
+        return x & -x;
+    }
+
+struct TdBITree {
+    int n, m;
+    ll c[N][N];
+
+    void init(int n, int m) {
+        this->n = n;
+        this->m = m;
+        memset(c, 0, sizeof(c))
+    }
+
+    void init(int n, int m, ll v) {
+        this->n = n;
+        this->m = m;
+        rep(x, 1, N) {
+            rep(y, 1, N) {
+                c[x][y] = (x * y + (x - lowbit(x)) * (y - lowbit(y)) - x * (y - lowbit(y)) - (x - lowbit(x)) * y) * v;
+            }
+        }
+    }
+
+    void change(int x, int y, ll v) {
+        for (int i = x; i <= n; i += lowbit(i))
+            for (int j = y; j <= m; j += lowbit(j))
+                c[i][j] += v;
+    }
+
+    ll query(int x, int y) {
+        ll ans = 0;
+        for (int i = x; i >= 1; i -= lowbit(i))
+            for (int j = y; j >= 1; j -= lowbit(j))
+                ans += c[i][j];
+        return ans;
+    }
+
+    ll solve(int x1, int y1, int x2, int y2) {
+        return query(x2, y2) - query(x1 - 1, y2) - query(x2, y1 - 1) + query(x1 - 1, y1 - 1);
+    }
+};\end{lstlisting}
+\subsection{线段树}
+\begin{lstlisting}
+// hdu 6562
+struct TreeNode {
+    int l, r;
+    int lson, rson;
+    ll sum;
+    ll len;
+    ll laz1, laz2, laz3;
+
+    inline void init(int a, int b, int ls, int rs) {
+        lson = ls;
+        rson = rs;
+        l = a, r = b;
+        sum = 0;
+        len = 1;
+        laz1 = laz2 = 0;
+        laz3 = 1;
+    }
+
+    inline int mid() {
+        return (l + r) >> 1;
+    }
+
+    inline int width() {
+        return r - l + 1;
+    }
+
+    inline void add(ll val) {
+        sum = (sum * 10 + val * len * 10 + val * width()) % MOD;
+        len = (len * 100) % MOD;
+        // 右懒惰
+        laz1 = (laz1 * 10 + val) % MOD;
+        // 左懒惰
+        laz2 = (laz2 + val * laz3) % MOD;
+        // 长度懒惰
+        laz3 = (laz3 * 10) % MOD;
+    }
+};
+
+struct SegTree {
+    int tot;
+    TreeNode node[N << 1];
+
+    inline void init() {
+        tot = 0;
+    }
+
+    inline void up(int k) {
+        TreeNode &nd = node[k];
+        nd.sum = (node[nd.lson].sum + node[nd.rson].sum) % MOD;
+        nd.len = (node[nd.lson].len + node[nd.rson].len) % MOD;
+    }
+
+    inline void push(int k) {
+        TreeNode &nd = node[k];
+        if (nd.laz3 == 1) return;
+        TreeNode &lson = node[nd.lson];
+        TreeNode &rson = node[nd.rson];
+
+        lson.sum = (nd.laz1 * lson.width() + lson.sum * nd.laz3 + nd.laz2 * lson.len % MOD * nd.laz3) % MOD;
+        lson.len = (lson.len * nd.laz3 % MOD * nd.laz3) % MOD;
+        lson.laz1 = (lson.laz1 * nd.laz3 + nd.laz1) % MOD;
+        lson.laz2 = (nd.laz2 * lson.laz3 + lson.laz2) % MOD;
+        lson.laz3 = (lson.laz3 * nd.laz3) % MOD;
+
+        rson.sum = (nd.laz1 * rson.width() + rson.sum * nd.laz3 + nd.laz2 * rson.len % MOD * nd.laz3) % MOD;
+        rson.len = (rson.len * nd.laz3 % MOD * nd.laz3) % MOD;
+        rson.laz1 = (rson.laz1 * nd.laz3 + nd.laz1) % MOD;
+        rson.laz2 = (nd.laz2 * rson.laz3 + rson.laz2) % MOD;
+        rson.laz3 = (rson.laz3 * nd.laz3) % MOD;
+
+        nd.laz1 = nd.laz2 = 0;
+        nd.laz3 = 1;
+    }
+
+    void build(int k, int l, int r) {
+        TreeNode &nd = node[k];
+        nd.init(l, r, tot + 1, tot + 2);
+        tot += 2;
+        if (l == r) {
+            return;
+        }
+        int mid = nd.mid();
+        build(nd.lson, nd.l, mid);
+        build(nd.rson, mid + 1, nd.r);
+        up(k);
+    }
+
+    void change(int k, int l, int r, ll val) {
+        TreeNode &nd = node[k];
+        if (nd.l == l && nd.r == r) {
+            nd.add(val);
+            return;
+        }
+        push(k);
+        int mid = nd.mid();
+        if (r <= mid) {
+            change(nd.lson, l, r, val);
+        } else if (l > mid) {
+            change(nd.rson, l, r, val);
+        } else {
+            change(nd.lson, l, mid, val);
+            change(nd.rson, mid + 1, r, val);
+        }
+        up(k);
+    }
+
+    ll query(int k, int l, int r) {
+        TreeNode &nd = node[k];
+        if (nd.l == l && nd.r == r) {
+            return nd.sum;
+        }
+        push(k);
+        int mid = nd.mid();
+        ll ans = 0;
+        if (r <= mid) {
+            ans += query(nd.lson, l, r);
+        } else if (l > mid) {
+            ans += query(nd.rson, l, r);
+        } else {
+            ans += query(nd.lson, l, mid);
+            ans += query(nd.rson, mid + 1, r);
+        }
+        return ans % MOD;
+    }
+} tree;\end{lstlisting}
+\subsection{二维线段树}
+\begin{lstlisting}
+
+const int N = 1005;
+
+struct SegTree {
+
+    inline int son(int k, int x) {
+        return (k << 2) - 2 + x;
+    }
+
+    struct node {
+        int l, r;
+
+        node() = default;
+
+        node(int a, int b) : l(a), r(b) {}
+
+        inline int mid() {
+            return (l + r) >> 1;
+        }
+
+        inline node left() {
+            return node(l, mid());
+        }
+
+        inline node right() {
+            return node(mid() + 1, r);
+        }
+
+        inline bool in(int x) {
+            return x >= l && x <= r;
+        }
+
+        inline bool more() {
+            return l < r;
+        }
+
+        bool operator==(const node &t) {
+            return l == t.l && r == t.r;
+        }
+    };
+
+    ll c[N << 2][N << 2];
+    ll ans[N << 4];
+    ll laz[N << 4];
+
+    inline void up(int k, bool x, bool y) {
+        int s = (k << 2) - 2;
+        ll t = 0;
+        if (x) t += ans[s] + ans[s + 1] + laz[s] + laz[s + 1];
+        if (y) t += ans[s + 2] + ans[s + 3] + laz[s + 2] + laz[s + 3];
+        ans[k] = t;
+    }
+
+    inline void push(int k) {
+        int s = (k << 2) - 2;
+        laz[s] += laz[k];
+        laz[s + 1] += laz[k];
+        laz[s + 2] += laz[k];
+        laz[s + 3] += laz[k];
+        ans[k] += laz[k];
+        laz[k] = 0;
+    }
+
+    void build(node x, node y, int k) {
+        laz[k] = 0;
+        if (x.more() && y.more()) {
+            ans[k] = c[x.l][y.l];
+            return;
+        }
+        ans[k] = 0;
+        bool ax = false;
+        bool ay = false;
+        if (x.more()) {
+            build(x.left(), y, son(k, 0));
+            build(x.right(), y, son(k, 1));
+        }
+        if (y.more()) {
+            build(x, y.left(), son(k, 2));
+            build(x, y.right(), son(k, 3));
+        }
+        up(k, x.more(), y.more());
+    }
+
+    void change(node x, node y, int k, node l, node r, ll v) {
+        if (x == l && y == r) {
+            laz[k] += v;
+            return;
+        }
+        push(k);
+        if (x.more()) {
+            if (l.r <= x.mid()) {
+                change(x.left(), y, son(k, 0), l, r, v);
+            } else if (l.l > x.mid()) {
+                change(x.right(), y, son(k, 1), l, r, v);
+            } else {
+                change(x.left(), y, son(k, 0), node(l.l, x.mid()), r, v);
+                change(x.right(), y, son(k, 1), node(x.mid() + 1, l.r), r, v);
+            }
+        }
+        if (y.more()) {
+            if (r.l <= y.mid()) {
+                change(x, y.left(), son(k, 2), l, r, v);
+            } else if (r.r > y.mid()) {
+                change(x, y.right(), son(k, 3), l, r, v);
+            } else {
+                change(x, y.left(), son(k, 2), l, node(r.l, y.mid()), v);
+                change(x, y.right(), son(k, 3), l, node(y.mid() + 1, r.r), v);
+            }
+        }
+        up(k, x.more(), y.more());
+    }
+
+    ll query(node x, node y, int k, node l, node r) {
+        if (x == l && y == r) {
+            return ans[k] + laz[k];
+        }
+        push(k);
+        ll t = 0;
+        if (x.more()) {
+            if (l.r <= x.mid()) {
+                t += query(x.left(), y, son(k, 0), l, r);
+            } else if (l.l > x.mid()) {
+                t += query(x.right(), y, son(k, 1), l, r);
+            } else {
+                t += query(x.left(), y, son(k, 0), node(l.l, x.mid()), r);
+                t += query(x.right(), y, son(k, 1), node(x.mid() + 1, l.r), r);
+            }
+        }
+        if (y.more()) {
+            if (r.l <= y.mid()) {
+                t += query(x, y.left(), son(k, 2), l, r);
+            } else if (r.r > y.mid()) {
+                t += query(x, y.right(), son(k, 3), l, r);
+            } else {
+                t += query(x, y.left(), son(k, 2), l, node(r.l, y.mid()));
+                t += query(x, y.right(), son(k, 3), l, node(y.mid() + 1, r.r));
+            }
+        }
+        return t;
+    }
+};\end{lstlisting}
+\subsection{树状数组求逆序对}
+\begin{lstlisting}
+BITree t;
+int n;
+pii a[N];
+
+void solve() {
+    t.init(n);
+    for (int i = 1; i <= n; i++) {
+        int x;
+        cin >> x;
+        a[i] = make_pair(x, i);
+    }
+    sort(a + 1, a + n + 1);
+    ll ans = 0;
+    for (int i = 1; i <= n; i++) {
+        t.change(a[i].second, 1);
+        ans += (i - t.query(a[i].second));
+    }
+    cout << ans << endl;
+}
+
+\end{lstlisting}
+\subsection{ST}
+\begin{lstlisting}
+// 只需要取值
+struct ST {
+    int ck[N];
+    int dp[20][N];
+
+    void init(int n, int squ[]) {
+        ++n;
+        ck[0] = -1;
+        for (int i = 1; i <= n; i++) {
+            ck[i] = ck[i - 1] + ((i & (i - 1)) == 0 ? 1 : 0);
+        }
+        for (int i = 0; i < n; i++) {
+            dp[0][i] = squ[i];
+        }
+        for (int k = 1; k <= ck[n]; k++) {
+            int dk = k - 1;
+            for (int i = 0; i + (1 << k) - 1 < n; i++) {
+                dp[k][i] = max(dp[dk][i], dp[dk][i + (1 << dk)]);
+            }
+        }
+    }
+
+    int query(int l, int r) {
+        if (l > r) swap(l, r);
+        int k = ck[r - l + 1];
+        return max(dp[k][l], dp[k][r - (1 << k) + 1]);
+    }
+};
+
+// 可得到下标
+struct ST {
+    int ck[N];
+    int rmq[N];
+    int dp[20][N];
+
+    void init(int n, int squ[]) {
+        ++n;
+        ck[0] = -1;
+        for (int i = 1; i <= n; i++) {
+            ck[i] = ck[i - 1] + ((i & (i - 1)) == 0 ? 1 : 0);
+        }
+        memcpy(rmq, squ, sizeof(int) * n);
+        for (int i = 0; i < n; i++) {
+            dp[0][i] = i;
+        }
+        for (int k = 1; k <= ck[n]; k++) {
+            int dk = k - 1;
+            for (int i = 0; i + (1 << k) - 1 < n; i++) {
+                int a = dp[dk][i];
+                int b = dp[dk][i + (1 << dk)];
+                dp[k][i] = rmq[a] < rmq[b] ? a : b;
+            }
+        }
+    }
+
+    int query(int l, int r) {
+        if (l > r) swap(l, r);
+        int k = ck[r - l + 1];
+        int a = dp[k][l];
+        int b = dp[k][r - (1 << k) + 1];
+        return rmq[a] < rmq[b] ? a : b;
+    }
+};\end{lstlisting}
+\subsection{笛卡尔树}
+\begin{lstlisting}
+// 笛卡尔树，静态建树，区间最值跳转
+struct CartesianTree {
+    int rt; // 根节点
+    pii ch[N]; // 左右儿子
+    int st[N]; // 单调栈
+
+    void build(int n, int p[]) {
+        rt = 0;
+        int t = 0;
+        for (int i = 1; i <= n; i++) {
+            ch[i] = {0, 0};
+            // 决定了大于还是小于
+            while (t && p[st[t]] > p[i]) --t;
+            if (t) { 
+                // 上一个点的右儿子作为自己的左儿子
+				// 成为上一个点的右儿子
+                ch[i].first = ch[st[t]].second;
+                ch[st[t]].second = i;
+            } else { // 自己作为根节点
+                ch[i].first = rt;
+                rt = i;
+            }
+            st[++t] = i;
+        }
+    }
+} dika;
+\end{lstlisting}
+\subsection{DancingLinks}
+\begin{lstlisting}
+// Dancing Links
+struct DLX {
+    int n, m, size;
+    int U[MaxNode], D[MaxNode], L[MaxNode], R[MaxNode], Row[MaxNode], Col[MaxNode];
+    int H[MaxN], S[MaxM];
+    int ansd, ans[MaxN];
+
+    void init(int _n, int _m) {
+        n = _n;
+        m = _m;
+        for (int i = 0; i <= m; i++) {
+            S[i] = 0;
+            U[i] = D[i] = i;
+            L[i] = i - 1;
+            R[i] = i + 1;
+        }
+        R[m] = 0;
+        L[0] = m;
+        size = m;
+        for (int i = 0; i <= n; i++) {
+            H[i] = -1;
+        }
+    }
+
+    void Link(int r, int c) {
+        ++S[Col[++size] = c];
+        Row[size] = r;
+        D[size] = D[c];
+        U[D[c]] = size;
+        U[size] = c;
+        D[c] = size;
+        if (H[r] < 0) {
+            H[r] = L[size] = R[size] = size;
+        } else {
+            R[size] = R[H[r]];
+            L[R[H[r]]] = size;
+            L[size] = H[r];
+            R[H[r]] = size;
+        }
+    }
+
+    void remove(int c) {
+        L[R[c]] = L[c];
+        R[L[c]] = R[c];
+        for (int i = D[c]; i != c; i = D[i]) {
+            for (int j = R[i]; j != i; j = R[j]) {
+                U[D[j]] = U[j];
+                D[U[j]] = D[j];
+                --S[Col[j]];
+            }
+        }
+    };
+
+    void resume(int c) {
+        for (int i = U[c]; i != c; i = U[i])
+            for (int j = L[i]; j != i; j = L[j])
+                ++S[Col[U[D[j]] = D[U[j]] = j]];
+        L[R[c]] = R[L[c]] = c;
+    }
+
+    bool Dance(int d) {
+        if (R[0] == 0) {
+            for (int i = 0; i < d; i++) {
+                printf("%d%c", ans[i], " \n"[i == d - 1]);
+            }
+            return true;
+        }
+        int c = R[0];
+        for (int i = R[0]; i != 0; i = R[i]) if (S[i] < S[c]) c = i;
+        remove(c);
+        for (int i = D[c]; i != c; i = D[i]) {
+            ans[d] = Row[i];
+            for (int j = R[i]; j != i; j = R[j])remove(Col[j]);
+            if (Dance(d + 1))return true;
+            for (int j = L[i]; j != i; j = L[j])resume(Col[j]);
+        }
+        resume(c);
+        return false;
+    }
+};\end{lstlisting}
+\subsection{静态主席树}
+\begin{lstlisting}
+// m=update count,MAXN>=m*log(n)
+const int N = int(2e5 + 10);
+const int MAXN = int(1e7 + 10);
+
+struct PSegTree {
+    const int *a;
+    pii ran; // Tree Range
+    int c[MAXN];
+    int tot = 0;
+    int lson[MAXN], rson[MAXN];
+
+    int build(int l, int r) {
+        int k = ++tot;
+        c[k] = 0;
+        if (l == r) {
+            return k;
+        }
+        int mid = (l + r) >> 1;
+        lson[k] = build(l, mid);
+        rson[k] = build(mid + 1, r);
+        return k;
+    }
+
+    int init(int l, int r, const int num[]) {
+        tot = 0;
+        a = num;
+        ran = {l, r};
+        return build(l, r);
+    }
+
+    int update(int rt, int p, int v) {
+        int k = ++tot, rst = k;
+        int l, r;
+        tie(l, r) = ran;
+        // calc
+        c[k] = c[rt] + v;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            // 下面的逗号表达式顺序不能换
+            if (p <= mid) {
+                // go left
+                rson[k] = rson[rt], rt = lson[rt], k = lson[k] = ++tot;
+                r = mid;
+            } else {
+                // go right
+                lson[k] = lson[rt], rt = rson[rt], k = rson[k] = ++tot;
+                l = mid + 1;
+            }
+            // calc
+            c[k] = c[rt] + v;
+        }
+        return rst;
+    }
+
+    // r1=right_root,r2=left_root,kth number
+    int query(int r1, int r2, int k) {
+        int l, r;
+        tie(l, r) = ran;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            int cnt = c[lson[r1]] - c[lson[r2]];
+            if (cnt >= k) {
+                r1 = lson[r1], r2 = lson[r2];
+                r = mid;
+            } else {
+                k -= cnt;
+                r1 = rson[r1], r2 = rson[r2];
+                l = mid + 1;
+            }
+        }
+        return l;
+    }
+	
+	// r1=right_root,r2=left_root, sum of num<=k
+    int sum(int r1, int r2, int k) {
+        int l, r;
+        tie(l, r) = ran;
+        int ans = 0;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            int cnt = c[lson[r1]] - c[lson[r2]];
+            if (k <= mid) {
+                r1 = lson[r1], r2 = lson[r2];
+                r = mid;
+            } else {
+                ans += cnt;
+                r1 = rson[r1], r2 = rson[r2];
+                l = mid + 1;
+            }
+        }
+        ans += c[r1] - c[r2];
+        return ans;
+    }
+} tree;\end{lstlisting}
+\subsection{动态主席树}
+\begin{lstlisting}
+// m: update count,MAXN>=m*log(n)^2
+const int N = int(2e5 + 10);
+const int MAXN = int(4e7 + 10);
+const int LN = 40;
+
+struct PSegTree {
+    const int *a;
+    pii ran;
+    int n;
+    int c[MAXN];
+    int tot = 0;
+    int lson[MAXN], rson[MAXN];
+    // t: static root, s: dynamic root
+    int t[N], s[N];
+
+    int build(int l, int r) {
+        int k = ++tot;
+        c[k] = 0;
+        if (l == r) {
+            return k;
+        }
+        int mid = (l + r) >> 1;
+        lson[k] = build(l, mid);
+        rson[k] = build(mid + 1, r);
+        return k;
+    }
+
+    // SegTree Range and n points, num can be nullptr
+    int init(int l, int r, int _n, const int num[]) {
+        tot = 0;
+        a = num;
+        ran = {l, r};
+        n = _n;
+        int rt = build(l, r);
+        for (int i = 0; i <= n; i++) t[i] = s[i] = rt;
+        return rt;
+    }
+
+    // update the root in k
+    void update(int k[], int rt[], int cnt, int p, int v) {
+        // calc
+        for (int i = 0; i < cnt; i++)
+            c[k[i]] = c[rt[i]] + v;
+        int l, r;
+        tie(l, r) = ran;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            // 下面的逗号表达式顺序不能换
+            if (p <= mid) {
+                // go left
+                for (int i = 0; i < cnt; i++) {
+                    rson[k[i]] = rson[rt[i]], rt[i] = lson[rt[i]], k[i] = lson[k[i]] = ++tot;
+                }
+                r = mid;
+            } else {
+                // go right
+                for (int i = 0; i < cnt; i++) {
+                    lson[k[i]] = lson[rt[i]], rt[i] = rson[rt[i]], k[i] = rson[k[i]] = ++tot;
+                }
+                l = mid + 1;
+            }
+            // calc
+            for (int i = 0; i < cnt; i++)
+                c[k[i]] = c[rt[i]] + v;
+        }
+    }
+
+    // build static tree
+    inline void change(int pos, int p, int v) {
+        if (v == 0) { // no change
+            t[pos] = t[pos - 1];
+        } else {
+            // use int as the int[]
+            // must use variable because I use the pointer
+            int rt = t[pos - 1];
+            int k = t[pos] = ++tot;
+            update(&k, &rt, 1, p, v);
+        }
+    }
+
+    int use1[LN], use2[LN];
+
+    // edit dynamic tree
+    inline void add(int pos, int p, int v) {
+        // memory reuse
+        int *k = use1, *rt = use2;
+        int cnt = 0;
+        for (int i = pos; i <= n; i += (i & -i), cnt++) {
+            rt[cnt] = s[i], s[i] = k[cnt] = ++tot;
+        }
+        update(k, rt, cnt, p, v);
+    }
+
+    // calc lson value in use
+    inline int sum(int use[], int cnt) {
+        int ans = 0;
+        for (int i = 0; i < cnt; i++)
+            ans += c[lson[use[i]]];
+        return ans;
+    }
+
+    // calc value in use
+    inline int calc(int use[], int cnt) {
+        int ans = 0;
+        for (int i = 0; i < cnt; i++)
+            ans += c[use[i]];
+        return ans;
+    }
+
+    // ans=p1-p2
+    int querySum(int p1, int p2, int k) {
+        int r1 = t[p1], r2 = t[p2];
+        int cnt1 = 0, cnt2 = 0;
+        // calc root in need
+        for (int i = p1; i; i -= (i & -i)) use1[cnt1++] = s[i];
+        for (int i = p2; i; i -= (i & -i)) use2[cnt2++] = s[i];
+        int l, r;
+        tie(l, r) = ran;
+        int ans = 0;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            int cnt = c[lson[r1]] - c[lson[r2]] + sum(use1, cnt1) - sum(use2, cnt2);
+            if (k <= mid) {
+                // go left
+                r1 = lson[r1], r2 = lson[r2];
+                for (int i = 0; i < cnt1; i++) use1[i] = lson[use1[i]];
+                for (int i = 0; i < cnt2; i++) use2[i] = lson[use2[i]];
+                r = mid;
+            } else {
+                // go right
+                ans += cnt;
+                r1 = rson[r1], r2 = rson[r2];
+                for (int i = 0; i < cnt1; i++) use1[i] = rson[use1[i]];
+                for (int i = 0; i < cnt2; i++) use2[i] = rson[use2[i]];
+                l = mid + 1;
+            }
+        }
+        int cnt = c[r1] - c[r2] + calc(use1, cnt1) - calc(use2, cnt2);
+        ans += cnt;
+        return ans;
+    }
+
+    // query k
+    int query(int p1, int p2, int k) {
+        int r1 = t[p1], r2 = t[p2];
+        int cnt1 = 0, cnt2 = 0;
+        // calc root in need
+        for (int i = p1; i; i -= (i & -i)) use1[cnt1++] = s[i];
+        for (int i = p2; i; i -= (i & -i)) use2[cnt2++] = s[i];
+        int l, r;
+        tie(l, r) = ran;
+        while (l < r) {
+            int mid = (l + r) >> 1;
+            int cnt = c[lson[r1]] - c[lson[r2]] + sum(use1, cnt1) - sum(use2, cnt2);
+            if (cnt >= k) {
+                // go left
+                r1 = lson[r1], r2 = lson[r2];
+                for (int i = 0; i < cnt1; i++) use1[i] = lson[use1[i]];
+                for (int i = 0; i < cnt2; i++) use2[i] = lson[use2[i]];
+                r = mid;
+            } else {
+                // go right
+                k -= cnt;
+                r1 = rson[r1], r2 = rson[r2];
+                for (int i = 0; i < cnt1; i++) use1[i] = rson[use1[i]];
+                for (int i = 0; i < cnt2; i++) use2[i] = rson[use2[i]];
+                l = mid + 1;
+            }
+        }
+        return l;
+    }
+} tree;\end{lstlisting}
+\subsection{伸展树Splay}
+\begin{lstlisting}
+const int N = int(1e6 + 100);
+
+struct Node;
+Node *tail, *null;
+// 回收栈
+Node *st[N], **stop;
+
+struct Node {
+    // 内存池
+    static Node pool[N];
+
+    Node *ch[2], *fa;
+    bool rev, edit;
+    int size, val;
+    ll sum;
+    ll dpl, dpr, dpm; // 左端开始最大，右端开始最大，实际最大
+
+    // 初始化内存池
+    static void init() {
+        null = tail = pool;
+        null->clear();
+        stop = st;
+    }
+
+    // 清空当前
+    inline void clear(int _val = 0, int _size = 0) {
+        edit = rev = false;
+        sum = val = _val;
+        size = _size;
+        fa = ch[0] = ch[1] = null;
+        dpl = dpr = dpm = _val;
+    }
+
+    inline void push_up() {
+        if (this == null) return;
+        size = ch[0]->size + ch[1]->size + 1;
+        sum = ch[0]->sum + ch[1]->sum + val;
+        Node *x = ch[0], *y = ch[1];
+        if (size == 1) {
+            dpl = dpr = dpm = val;
+        } else if (y == null) {
+            dpl = max(x->dpl, x->sum + val);
+            dpr = max(1ll * val, val + x->dpr);
+            dpm = max(x->dpm, val + max(x->dpr, 0ll));
+        } else if (x == null) {
+            dpl = max(1ll * val, val + y->dpl);
+            dpr = max(y->dpr, y->sum + val);
+            dpm = max(y->dpm, val + max(y->dpl, 0ll));
+        } else {
+            dpl = max(x->dpl, max(x->sum + val, x->sum + val + y->dpl));
+            dpr = max(y->dpr, max(y->sum + val, y->sum + val + x->dpr));
+            dpm = max(max(x->dpm, y->dpm), val + max(x->dpr, 0ll) + max(y->dpl, 0ll));
+        }
+    }
+
+    // 设置儿子
+    inline void setc(Node *p, int d) { ch[d] = p, p->fa = this; }
+
+    // 获取方向
+    inline bool d() { return fa->ch[1] == this; }
+
+    inline void update_rev() {
+        if (this == null) return;
+        swap(ch[0], ch[1]);
+        swap(dpl, dpr);
+        rev ^= 1;
+    }
+
+    inline void update_val(int v) {
+        if (this == null) return;
+        val = v;
+        sum = 1ll * size * v;
+        edit = 1;
+        dpl = dpr = dpm = max(1ll * val, sum);
+    }
+
+    inline void push_down() {
+        if (this == null) return;
+        if (rev) {
+            ch[0]->update_rev(), ch[1]->update_rev();
+            rev = 0;
+        }
+        if (edit) {
+            ch[0]->update_val(val), ch[1]->update_val(val);
+            edit = 0;
+        }
+    }
+
+    inline bool isroot() {
+        return fa == null || (this != fa->ch[0] && this != fa->ch[1]);
+    }
+};
+
+Node Node::pool[N];
+
+// 获取第k个
+Node *get_kth(Node *x, int k) {
+    while (x->ch[0]->size + 1 != k) {
+        x->push_down();
+        if (x->ch[0]->size >= k) {
+            x = x->ch[0];
+        } else {
+            k -= x->ch[0]->size + 1;
+            x = x->ch[1];
+        }
+    }
+    return x;
+}
+
+void rotate(Node *x) {
+    Node *f = x->fa, *ff = f->fa;
+    f->push_down();
+    x->push_down();
+    int c = x->d(), cc = f->d();
+    f->setc(x->ch[!c], c);
+    x->setc(f, !c);
+    if (ff->ch[cc] == f) ff->setc(x, cc);
+    else x->fa = ff;
+    f->push_up();
+}
+
+void splay(Node *&root, Node *x, Node *goal) {
+    for (Node *f; (f = x->fa) != goal; rotate(x)) {
+        if (f->fa == goal) continue;
+        f->fa->push_down();
+        f->push_down();
+        x->push_down();
+        rotate(x->d() == f->d() ? f : x);
+    }
+    x->push_up();
+    if (goal == null) root = x;
+}
+
+int a[N];
+
+// 获取有效节点
+inline Node *getNode() { return stop == st ? ++tail : *--stop; }
+
+Node *build(int l, int r) {
+    int mid = (l + r) >> 1;
+    Node *root = getNode();
+    root->clear();
+    root->val = a[mid];
+    root->size = 1;
+    if (l < mid) root->setc(build(l, mid - 1), 0);
+    if (r > mid) root->setc(build(mid + 1, r), 1);
+    root->push_up();
+    return root;
+}
+
+// l->root, r->root.ch[1]
+inline Node *make(Node *&root, int l, int r) {
+    Node *x = get_kth(root, l);
+    splay(root, x, null);
+    Node *y = get_kth(root, r);
+    splay(root, y, root);
+    return y;
+}
+
+// 插入p子树
+inline void insert(Node *&root, int l, int r, Node *p) {
+    Node *x = make(root, l, r);
+    x->setc(p, 0);
+    x->push_up();
+    x->fa->push_up();
+}
+
+// 回收内存
+inline void clear(Node *&x) {
+    if (x == null) return;
+    auto now = stop;
+    *stop++ = x;
+    while (now != stop) {
+        x = *now++;
+        if (x->ch[0] != null) *stop++ = x->ch[0];
+        if (x->ch[1] != null) *stop++ = x->ch[1];
+    }
+}
+
+// 释放子树
+inline void del(Node *&root, int l, int r) {
+    Node *x = make(root, l, r);
+    clear(x->ch[0]);
+    x->ch[0] = null;
+    x->push_up();
+    x->fa->push_up();
+}
+
+// 转向
+inline void reverse(Node *&root, int l, int r) {
+    Node *x = make(root, l, r);
+    x->ch[0]->update_rev();
+    x->push_up();
+    x->fa->push_up();
+}
+
+// set value
+inline void make_same(Node *&root, int l, int r, int val) {
+    Node *x = make(root, l, r);
+    x->ch[0]->update_val(val);
+    x->push_up();
+    x->fa->push_up();
+}
+
+// 求和
+inline ll sum(Node *&root, int l, int r) {
+    Node *x = make(root, l, r);
+    return x->ch[0]->sum;
+}
+
+// 求最大子串和
+inline ll maxsum(Node *&root, int l, int r) {
+    Node *x = make(root, l, r);
+    return x->ch[0]->dpm;
+}
+
+void debug(Node *root) {
+    function<void(Node *)> dfs = [&dfs](Node *x) {
+        if (x == null) return;
+        x->push_down();
+        dfs(x->ch[0]);
+        cout << x->val << ' ';
+        dfs(x->ch[1]);
+    };
+    dfs(root);
+    cout << endl;
+}\end{lstlisting}
+\clearpage\section{图论}
+\subsection{Graph}
+\begin{lstlisting}
+#define forg(i, h, eg) for(int i = (h); ~i; i = (eg[i]).nxt)
+
+struct Edge {
+    int e, nxt;
+    ll v;
+    Edge() = default;
+    Edge(int a, ll b, int c = 0) : e(a), v(b), nxt(c) {}
+
+    bool operator<(const Edge &a) const {
+        return (a.v == v ? e < a.e : v < a.v);
+    }
+};
+
+const ll INF = ll(1e11);
+const int N = int(1e5 + 10);
+const int M = int(3e5 + 10);
+
+struct Graph {
+    Edge eg[M];
+    int head[N];
+    int cnt;
+
+    void init(int n) {
+        memset(head, -1, sizeof(int) * ++n);
+        cnt = 0;
+    }
+
+    inline void addEdge(int x, int y, ll v = 0) {
+        eg[cnt] = Edge(y, v, head[x]);
+        head[x] = cnt++;
+    }
+} gh;\end{lstlisting}
+\subsection{Dijkstra}
+\begin{lstlisting}
+int dist[N];
+int path[N];
+
+void bfs(int s, int n) {
+    n++;
+    rep(i, 0, n) dist[i] = INF;
+    memset(path, -1, sizeof(int) * n);
+    dist[s] = 0;
+    path[s] = s;
+	// 注意优先队列默认less运算，但选择最大的作为top，注意cmp！！！
+    priority_queue<Edge, vector<Edge>, greater<Edge>> q;
+    q.push(Edge(s, dist[s]));
+    while (!q.empty()) {
+        Edge f = q.top();
+        q.pop();
+        for (int i = gh.head[f.e]; ~i; i = gh.eg[i].nxt) {
+            Edge &t = gh.eg[i];
+            if (dist[t.e] > f.v + t.v) {
+                dist[t.e] = f.v + t.v;
+                path[t.e] = f.e;
+                q.push(Edge(t.e, dist[t.e]));
+            }
+        }
+    }
+}
+
+#include <ext/pb_ds/priority_queue.hpp>
+#include <ext/pb_ds/assoc_container.hpp>
+typedef __gnu_pbds::priority_queue<Edge, greater<Edge>> heap;
+// 使用该模板，需要注意因为使用了greater，所以需要重载大于运算
+// 默认pairing_heap_tag
+// push O(1), pop O(logn) modify O(logn) erase O(logn) join O(1)
+// 可选thin_heap_tag
+// push O(1), pop O(logn) modify O(1) erase O(logn) join O(n)
+
+heap::point_iterator its[N];
+int cnt[N];
+
+void bfs(int s, int n) {
+    n++;
+    rep(i, 0, n) dist[i] = INF;
+    memset(cnt, 0, sizeof(int) * n);
+    dist[s] = 0;
+    cnt[s] = 1;
+    heap q;
+    its[s] = q.push(Edge(s, dist[s]));
+    while (!q.empty()) {
+        Edge f = q.top();
+        q.pop();
+        for (int i = gh.head[f.e]; ~i; i = gh.eg[i].nxt) {
+            Edge &t = gh.eg[i];
+            its[t.e] = 0;
+            int v = f.v + t.v;
+            if (dist[t.e] > v) {
+                dist[t.e] = v;
+                if (its[t.e] != 0) {
+                    q.modify(its[t.e], Edge(t.e, dist[t.e]));
+                } else {
+                    its[t.e] = q.push(Edge(t.e, dist[t.e]));
+                }
+                cnt[t.e] = cnt[f.e];
+            } else if (dist[t.e] == v) {
+                (cnt[t.e] += cnt[f.e]) %= 100003;
+            }
+        }
+    }
+}\end{lstlisting}
+\subsection{spfa}
+\begin{lstlisting}
+vector<int> dist;
+vector<vector<node>> eg;
+vector<int> path;
+
+bool spfa(int n, int start) {
+    dist.assign(n, INF);
+    dist[start] = 0;
+    deque<int> q;
+    q.push_back(start);
+    path.assign(n, -1);
+    vector<int> cnt(n, 0);
+    vector<bool> flag(n, false);
+    cnt[start] = flag[start] = true;
+    while (!q.empty()) {
+        const int now = q.front();
+        q.pop_front();
+        flag[now] = false;
+        for (auto i: eg[now]) {
+            if (dist[i.x] > dist[now] + i.d) {
+                dist[i.x] = dist[now] + i.d;
+                path[i.x] = now;
+                if (!flag[i.x]) {
+                    if (n == ++cnt[i.x]) return false;
+                    //队列非空且优于队首（SLF）
+                    if (!q.empty() && dist[i.x] < dist[q.front()]) {
+                        q.push_front(i.x);
+                    } else {
+                        q.push_back(i.x);
+                    }
+                    flag[i.x] = true;
+                }
+            }
+        }
+    }
+    return true;
+}
+\end{lstlisting}
+\subsection{Dinic}
+\begin{lstlisting}
+struct Dinic {
+    Graph gh;
+    // 点的范围[0, n)
+    int n;
+    // 弧优化
+    int cur[N], dis[N];
+
+    Dinic(){};
+
+    // 设置N
+    void init(int _n) {
+        n = _n;
+        gh.init(n);
+    }
+
+    // 加流量
+    void addFlow(int x, int y, ll f) {
+        gh.addEdge(x, y, f);
+        gh.addEdge(y, x, 0);
+    }
+
+    bool bfs(int s, int e) {
+        memset(dis, -1, sizeof(int) * n);
+        int q[N];
+        int l, r;
+        l = r = 0;
+        dis[s] = 0;
+        q[r++] = s;
+        while (l < r) {
+            int f = q[l++];
+            for (int i = gh.head[f]; ~i; i = gh.eg[i].nxt) {
+                if (gh.eg[i].v > 0 && dis[gh.eg[i].e] == -1) {
+                    dis[gh.eg[i].e] = dis[f] + 1;
+                    q[r++] = gh.eg[i].e;
+                }
+            }
+        }
+        return dis[e] > 0;
+    }
+
+    ll dfs(int s, int e, ll mx) {
+        if (s == e || mx == 0) {
+            return mx;
+        }
+        ll flow = 0;
+        for (int &k = cur[s]; ~k; k = gh.eg[k].nxt) {
+            auto &eg = gh.eg[k];
+            ll a;
+            if (eg.v > 0 && dis[eg.e] == dis[s] + 1 && (a = dfs(eg.e, e, min(eg.v, mx)))) {
+                eg.v -= a;
+                gh.eg[k ^ 1].v += a;
+                flow += a;
+                mx -= a;
+                if (mx <= 0) break;
+            }
+        }
+        return flow;
+    }
+
+    ll max_flow(int s, int e) {
+        ll ans = 0;
+        while (bfs(s, e)) {
+            memcpy(cur, gh.head, sizeof(int) * n);
+            ans += dfs(s, e, INF);
+        }
+        return ans;
+    }
+} dinic;\end{lstlisting}
+\subsection{hungry}
+\begin{lstlisting}
+#define N 105
+#define M 10005
+int n, m, k;
+pii eg[M * 2];
+int result[N * 2];
+int head[N * 2];
+int cnt = 0;
+
+void addEdge(int x, int y) {
+    eg[cnt].first = y;
+    eg[cnt].second = head[x];
+    head[x] = cnt++;
+}
+
+bool vis[M * 2] = {false};
+
+int dfs(int x) {
+    for (int i = head[x]; ~i; i = eg[i].second) {
+        int y = eg[i].first;
+        if (!vis[y]) {
+            vis[y] = true;
+            if (result[y] == -1 || dfs(result[y])) {
+                result[y] = x;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int MaxMatch() {
+    int ans = 0;
+    memset(result, -1, sizeof(result));
+    rep(i, 1, n + 1) {
+        memset(vis, 0, sizeof(vis));
+        ans += dfs(i);
+    }
+    return ans;
+}
+
+void solve() {
+    scanf("%d%d", &m, &k);
+    memset(head, -1, sizeof(head));
+    cnt = 0;
+    rep(i, 0, k) {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        addEdge(x, y);
+    }
+    int ans = MaxMatch();
+    printf("%d\n", ans);
+}\end{lstlisting}
+\subsection{MinSpanTree}
+\begin{lstlisting}
+/*
+* Prim 求 MST
+* 耗费矩阵 cost[][]，标号从 0 开始，0∼n-1
+* 返回最小生成树的权值，返回 -1 表示原图不连通
+ */
+const int INF = 0x3f3f3f3f;
+const int N = 110;
+bool vis[N];
+int lowc[N]; //点是 0 n-1 
+int prim(int cost[][N], int n) {
+    int ans = 0;
+    memset(vis, false, sizeof(vis));
+    vis[0] = true;
+    for (int i = 1; i < n; i++)lowc[i] = cost[0][i];
+    for (int i = 1; i < n; i++) {
+        int minc = INF;
+        int p =−1;
+        19
+        for (int j = 0; j < n; j++)
+            if (!vis[j] && minc > lowc[j]) {
+                minc = lowc[j];
+                p = j;
+            }
+        if (minc == INF)return −1;//原图不连通 
+        ans += minc;
+        vis[p] = true;
+        for (int j = 0; j < n; j++)
+            if (!vis[j] && lowc[j] > cost[p][j])
+                lowc[j] = cost[p][j];
+    }
+    return ans;
+}\end{lstlisting}
+\subsection{MinCostMaxFlow}
+\begin{lstlisting}
+struct Edge {
+    int e, nxt;
+    ll flow, cost;
+
+    Edge() {};
+
+    Edge(int a, ll b, ll c, int d = 0) : e(a), flow(b), cost(c), nxt(d) {}
+};
+
+const ll INF = 1000000;
+const int N = int(1e5 + 10);
+const int M = int(1e5 + 10);
+
+//前向星
+struct Graph {
+    Edge eg[M];
+    int head[N];
+    int cnt;
+
+    void init(int n) {
+        memset(head, -1, sizeof(int) * ++n);
+        cnt = 0;
+    }
+
+    inline void addEdge(int x, int y, ll v, ll c) {
+        eg[cnt] = Edge(y, v, c, head[x]);
+        head[x] = cnt++;
+    }
+};
+
+struct MinCostMaxFlow {
+    Graph gh;
+    // 点的范围[0, n)
+    int n;
+
+    // 设置N
+    void init(int _n) {
+        n = _n + 1;
+        gh.init(n);
+    }
+
+    // 加流量，反向是负的花费
+    void addFlow(int x, int y, ll f, ll c) {
+        // printf("%d->%d: %lld\t%lld\n", x, y, f, c); fflush(stdout);
+        gh.addEdge(x, y, f, c);
+        gh.addEdge(y, x, 0, -c);
+    }
+
+    // 该pre存的是边
+    int pre[N];
+    int dis[N];
+    bool vis[N];
+
+    bool spfa(int s, int e) {
+        queue<int> q;
+        for (int i = 0; i < n; i++) {
+            dis[i] = INF;
+            vis[i] = false;
+            pre[i] = -1;
+        }
+        dis[s] = 0;
+        vis[s] = true;
+        q.push(s);
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            vis[u] = false;
+            for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+                Edge &eg = gh.eg[i];
+                if (eg.flow > 0 && dis[eg.e] > dis[u] + eg.cost) {
+                    dis[eg.e] = dis[u] + eg.cost;
+                    pre[eg.e] = i;
+                    if (!vis[eg.e]) {
+                        vis[eg.e] = true;
+                        q.push(eg.e);
+                    }
+                }
+            }
+        }
+        return pre[e] != -1;
+    }
+
+    pll cal(int s, int e) {
+        ll flow = 0, cost = 0;
+        while (spfa(s, e)) {
+            ll f = INF;
+            for (int i = pre[e]; ~i; i = pre[gh.eg[i ^ 1].e]) {
+                f = min(f, gh.eg[i].flow);
+            }
+            for (int i = pre[e]; ~i; i = pre[gh.eg[i ^ 1].e]) {
+                gh.eg[i].flow -= f;
+                gh.eg[i ^ 1].flow += f;
+                cost += gh.eg[i].cost;
+            }
+            flow += f;
+        }
+        return make_pair(flow, cost);
+    }
+
+} network;
+
+// vector图存
+struct MinCostMaxFlow {
+    vector<Edge> g[N];
+    // 点的范围[0, n)
+    int n = 0;
+
+    // 设置N
+    void init(int _n) {
+        rep(i, 0, n) {
+            g[i].clear();
+        }
+        n = _n + 1;
+    }
+
+    // 加流量，反向是负的花费
+    void addFlow(int x, int y, int f, int c) {
+        g[x].push_back(Edge(y, f, c, g[y].size()));
+        g[y].push_back(Edge(x, 0, -c, g[x].size() - 1));
+    }
+
+    // 该pre存的是(点,边)
+    pii pre[N];
+    int dis[N];
+    bool vis[N];
+    int h[N];
+
+    int cnt = 0;
+
+    bool bfs(int s, int e) {
+        priority_queue<pii, vector<pii>, greater<pii>> q;
+        for (int i = 0; i < n; i++) {
+            dis[i] = INF;
+            vis[i] = false;
+            pre[i] = pii(-1, -1);
+        }
+        dis[s] = 0;
+        q.push(pii(0, s));
+        while (!q.empty()) {
+            pii f = q.top();
+            int u = f.second;
+            q.pop();
+            if (f.first != dis[u]) continue;
+            for (int i = 0; i < sz(g[u]); i++) {
+                auto &eg = g[u][i];
+                if (eg.flow == 0) continue;
+                int v = eg.e;
+                int cost = eg.cost + dis[u] + h[u] - h[v];
+                if (dis[v] > cost) {
+                    cnt++;
+                    dis[v] = cost;
+                    pre[v] = pii(u, i);
+                    q.push(pii(dis[v], v));
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            h[i] += dis[i];
+        }
+        return pre[e].second != -1;
+    }
+
+    pii cal(int s, int e, int limit) {
+        int flow = 0, cost = 0;
+        memset(h, 0, sizeof(int) * n);
+        cnt = 0;
+        while (limit) {
+            if (!bfs(s, e)) break;
+            int f = INF;
+            for (int i = e; ~pre[i].second; i = pre[i].first) {
+                f = min(f, g[pre[i].first][pre[i].second].flow);
+            }
+            for (int i = e; ~pre[i].second; i = pre[i].first) {
+                g[pre[i].first][pre[i].second].flow -= f;
+                g[i][g[pre[i].first][pre[i].second].nxt].flow += f;
+            }
+            cost += f * h[e];
+            flow += f;
+            limit -= f;
+        }
+        return make_pair(flow, cost);
+    }
+
+} network;  \end{lstlisting}
+\subsection{ISAP}
+\begin{lstlisting}
+struct ISAP {
+    Graph gh;
+    // 点的范围[0, n)
+    int n;
+    // 弧优化
+    int cur[N], dis[N];
+    ISAP() {};
+    // 设置N
+    void init(int _n) {
+        n = _n;
+        gh.init(n);
+    }
+
+    // 加流量
+    inline void addFlow(int x, int y, ll f) {
+        gh.addEdge(x, y, f);
+        gh.addEdge(y, x, 0);
+    }
+
+    int dep[N]; // 记录距离标号
+    int gap[N]; // gap常数优化
+    int q[N]; // 数组模拟队列
+
+    void bfs(int s, int e) {
+        memset(dep, -1, sizeof(int) * n);
+        memset(gap, 0, sizeof(int) * n);
+        gap[0] = 1;
+        dep[e] = 0;
+        int l = 0, r = 0;
+        q[r++] = e;
+        while (l < r) {
+            int u = q[l++];
+            for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+                int v = gh.eg[i].e;
+                if (~dep[v]) continue;
+                q[r++] = v;
+                dep[v] = dep[u] + 1;
+                gap[dep[v]]++;
+            }
+        }
+    }
+
+    ll st[N]; // 栈优化
+
+    ll max_flow(int s, int e) {
+        bfs(s, e);
+        memcpy(cur, gh.head, sizeof(int) * n);
+        int top = 0;
+        int u = s;
+        ll ans = 0;
+        while (dep[s] < N) {
+            if (u == e) {
+                ll mf = INF;
+                int sel = 0;
+                for (int i = 0; i < top; i++) {
+                    if (mf > gh.eg[st[i]].v) {
+                        mf = gh.eg[st[i]].v;
+                        sel = i;
+                    }
+                }
+
+                for (int i = 0; i < top; i++) {
+                    gh.eg[st[i]].v -= mf;
+                    gh.eg[st[i] ^ 1].v += mf;
+                }
+                ans += mf;
+                top = sel;
+                u = gh.eg[st[top] ^ 1].e;
+                continue;
+            }
+            bool flag = false;
+            int v = 0;
+            for (int i = cur[u]; ~i; i = gh.eg[i].nxt) {
+                v = gh.eg[i].e;
+                if (gh.eg[i].v > 0 && dep[v] + 1 == dep[u]) {
+                    flag = true;
+                    cur[u] = i;
+                    break;
+                }
+            }
+            if (flag) {
+                st[top++] = cur[u];
+                u = v;
+                continue;
+            }
+            int mind = N;
+            for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+                if (gh.eg[i].v > 0 && dep[gh.eg[i].e] < mind) {
+                    mind = dep[gh.eg[i].e];
+                    cur[u] = i;
+                }
+            }
+            gap[dep[u]]--; // 当前层无法连通，降层
+            if (!gap[dep[u]]) return ans; // 断层结束运算
+            dep[u] = mind + 1; // 进入更高层
+            gap[dep[u]]++;
+            if (u != s)  u = gh.eg[st[--top] ^ 1].e;
+        }
+        return ans;
+    }
+} isap;\end{lstlisting}
+\subsection{树链剖分}
+\begin{lstlisting}
+struct TreeChain {
+    int top[N]; // 链条顶端点ID
+    int fa[N]; // 父亲节点
+    int son[N]; // 重儿子
+    int deep[N]; // 深度
+    int num[N]; // 儿子节点数（包括自己）
+
+
+    int p[N]; // 在线段树中的ID，
+    int fp[N]; // 线段树中ID对应的点
+    int tot;
+
+    void dfs(int u, int pre, int d) {
+        num[u] = 1;
+        deep[u] = d;
+        fa[u] = pre;
+        for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+            int v = gh.eg[i].e;
+            if (v == pre) continue;
+            dfs(v, u, d + 1);
+            num[u] += num[v];
+            if (son[u] == -1 || num[v] > num[son[u]]) {
+                son[u] = v;
+            }
+        }
+    }
+
+    void getpos(int u, int sp) {
+        top[u] = sp;
+        p[u] = tot++;
+        fp[p[u]] = u;
+        if (son[u] == -1) return;
+        getpos(son[u], sp);
+        for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+            int v = gh.eg[i].e;
+            if (v == son[u] || v == fa[u]) continue;
+            getpos(v, v);
+        }
+    }
+
+    void build(int start, int root, int n) {
+        memset(son, -1, sizeof(int) * ++n);
+        tot = start; // start是线段树中的ID起始数值
+        dfs(root, 0, 0);
+        getpos(root, root);
+    }
+} treec;
+
+// 树状数组，如果无需在线查询可以使用差分树
+BITree tree;
+
+// 点权修改
+void change1(int u, int v, ll val) {
+    int f1 = treec.top[u];
+    int f2 = treec.top[v];
+    while (f1 != f2) {
+        if (treec.deep[f1] < treec.deep[f2]) {
+            swap(f1, f2);
+            swap(u, v);
+        }
+        tree1.update(treec.p[f1], treec.p[u], val);
+        u = treec.fa[f1];
+        f1 = treec.top[u];
+    }
+    if (treec.deep[u] > treec.deep[v]) {
+        swap(u, v);
+    }
+    tree1.update(treec.p[u], treec.p[v], val);
+}
+
+// 边权修改
+void change2(int u, int v, ll val) {
+    int f1 = treec.top[u];
+    int f2 = treec.top[v];
+    while (f1 != f2) {
+        if (treec.deep[f1] < treec.deep[f2]) {
+            swap(f1, f2);
+            swap(u, v);
+        }
+        tree2.update(treec.p[f1], treec.p[u], val);
+        u = treec.fa[f1];
+        f1 = treec.top[u];
+    }
+    if (treec.deep[u] > treec.deep[v]) {
+        swap(u, v);
+    }
+    tree2.update(treec.p[treec.son[u]], treec.p[v], val);
+}\end{lstlisting}
+\subsection{倍增LCA}
+\begin{lstlisting}
+const int MAX_DEP = 20;
+
+// 倍增2^k的父亲
+int fa[N][MAX_DEP];
+int dep[N];
+
+// 倍增LCA
+int lca(int u, int v) {
+    if (dep[u] > dep[v]) {
+        swap(u, v);
+    }
+    int hu = dep[u], hv = dep[v];
+    int tu = u, tv = v;
+    for (int det = hv - hu, i = 0; det; det >>= 1, i++) {
+        if (det & 1)
+            tv = fa[tv][i];
+    }
+    if (tu == tv) {
+        return tu;
+    }
+    for (int i = MAX_DEP - 1; i >= 0; i--) {
+        if (fa[tu][i] == fa[tv][i]) {
+            continue;
+        }
+        tu = fa[tu][i];
+        tv = fa[tv][i];
+    }
+    return fa[tu][0];
+}
+
+// 动态更新节点的父亲属性
+void lineFa(int u, int v) {
+    fa[u][0] = v;
+    for (int i = 1; i < MAX_DEP; i++) {
+        v = fa[u][i] = fa[v][i - 1];
+    }
+}\end{lstlisting}
+\subsection{Tarjan}
+\begin{lstlisting}
+int dfn[N], low[N], st[N], belong[N], num[N];
+bool inst[N];
+int idx, top, scc;
+
+void tarjan(int u) {
+    dfn[u] = low[u] = ++idx;
+    st[top++] = u;
+    inst[u] = true;
+    for (int i = gh.head[u]; i != -1; i = gh.eg[i].nxt) {
+        int v = gh.eg[i].e;
+        if (!dfn[v]) {
+            tarjan(v);
+            low[u] = min(low[u], low[v]);
+        } else if (inst[v]) {
+            low[u] = min(low[u], dfn[v]);
+        }
+    }
+    int v;
+    if (dfn[u] == low[u]) {
+        scc++;
+        do {
+            v = st[--top];
+            inst[v] = false;
+            belong[v] = scc;
+            num[scc]++;
+        } while (u != v);
+    }
+}\end{lstlisting}
+\subsection{支配树}
+\begin{lstlisting}
+const int MAX_DEP = 20;
+
+// 注意0,1点的边界问题
+struct DominatorTree {
+    int deg[N]; // 入度
+    int dep[N]; //
+    int dfn[N];
+    int st[N];
+    int tot;
+
+    // 拓扑序, 要保证root是入度为0
+    void bfs(Graph &gh, int root) {
+        queue<int> q;
+        q.push(root);
+        tot = 0;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            dfn[u] = ++tot;
+            st[tot] = u;
+            forg(i, gh.head[u], gh.eg) {
+                int v = gh.eg[i].e;
+                if ((--deg[v]) == 0) {
+                    q.push(v);
+                }
+            }
+        }
+    }
+
+    // 倍增2^k的父亲
+    int fa[N][MAX_DEP];
+
+    // 倍增LCA
+    int lca(int u, int v) {
+        if (dep[u] > dep[v]) {
+            swap(u, v);
+        }
+        int hu = dep[u], hv = dep[v];
+        int tu = u, tv = v;
+        for (int det = hv - hu, i = 0; det; det >>= 1, i++) {
+            if (det & 1)
+                tv = fa[tv][i];
+        }
+        if (tu == tv) {
+            return tu;
+        }
+        for (int i = MAX_DEP - 1; i >= 0; i--) {
+            if (fa[tu][i] == fa[tv][i]) {
+                continue;
+            }
+            tu = fa[tu][i];
+            tv = fa[tv][i];
+        }
+        return fa[tu][0];
+    }
+
+    // 动态更新节点的父亲属性
+    void lineFa(int u, int v) {
+        fa[u][0] = v;
+        for (int i = 1; i < MAX_DEP; i++) {
+            v = fa[u][i] = fa[v][i - 1];
+        }
+    }
+
+    // 建树, op是gh的反向图，用来寻找其父亲
+    void build(Graph &gh, Graph &op, int n, int root) {
+        memcpy(deg, gh.deg, sizeof(int) * (n + 1));
+        bfs(gh, root);
+        for (int k = 1; k <= tot; k++) {
+            int u = st[k], fath = -1;
+            dep[u] = 0;
+            for (int i = op.head[u]; ~i; i = op.eg[i].nxt) {
+                int v = op.eg[i].e;
+                if (dfn[v] > dfn[u]) continue;
+                fath = (fath == -1 ? v : lca(fath, v));
+            }
+            if (fath == -1) fath = u;
+            lineFa(u, fath);
+            dep[u] = dep[fath] + 1;
+        }
+    }
+} dtree;\end{lstlisting}
+\subsection{Hopcroft-Karp}
+\begin{lstlisting}
+int dis;
+// linkx: x链接的y，linky: y链接的x
+int linkx[N], linky[N];
+int dx[N], dy[N];
+bool vis[N];
+
+bool searchP(int n) {
+    queue<int> q;
+    dis = INF;
+    mst(dx, -1, n);
+    mst(dy, -1, n);
+    for (int i = 0; i < n; i++) {
+        if (linkx[i] == -1) {
+            q.push(i);
+            dx[i] = 0;
+        }
+    }
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        if (dx[u] > dis) break;
+        for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+            int v = gh.eg[i].e;
+            if (dy[v] == -1) {
+                dy[v] = dx[u] + 1;
+                if (linky[v] == -1) {
+                    dis = dy[v];
+                } else {
+                    dx[linky[v]] = dy[v] + 1;
+                    q.push(linky[v]);
+                }
+            }
+        }
+    }
+    return dis != INF;
+}
+
+bool dfs(int u) {
+    for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+        int v = gh.eg[i].e;
+        if (!vis[v] && dy[v] == dx[u] + 1) {
+            vis[v] = true;
+            if (linky[v] != -1 && dy[v] == dis) continue;
+            if (linky[v] == -1 || dfs(linky[v])) {
+                linky[v] = u;
+                linkx[u] = v;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int MaxMatch(int n) {
+    int rst = 0;
+    mst(linkx, -1, n);
+    mst(linky, -1, n);
+    while (searchP(n)) {
+        mst(vis, false, n);
+        for (int i = 0; i < n; i++) {
+            if (linkx[i] == -1 && dfs(i)) {
+                rst++;
+            }
+        }
+    }
+    return rst;
+}\end{lstlisting}
+\clearpage\section{博弈}
+\subsection{GameProblem}
+\begin{lstlisting}
+// 巴什博奕, 是否先手必胜
+inline bool bash_game(int n, int m) {
+    //一堆东西, n个物品,最多选m个
+    return n % (m + 1);
+}
+
+// 威佐夫博弈, 是否先手必胜
+// 有两堆各若干的物品，两人轮流从其中一堆取至少一件物品，至多不限，或从两堆中同时取相同件物品，规定最后取完者胜利。
+inline bool wythoff_game(int n, int m) {
+    if (n > m) {
+        swap(n, m);
+    }
+    int temp = floor((n2 - n1) * (1 + sqrt(5.0)) / 2.0);
+    return temp != n1;
+}
+// SG函数
+#define N 1001
+//f[]：可以取走的石子个数
+//sg[]:0~n的SG函数值
+int f[N], sg[N], mex[N];
+
+void getSG(int n) {
+    int i, j;
+    memset(sg, 0, sizeof(sg));
+    for (i = 1; i <= n; i++) {
+        memset(mex, 0, sizeof(mex));
+        for (j = 1; f[j] <= i; j++)
+            mex[sg[i - f[j]]] = 1;
+        for (j = 0; j <= n; j++) { //求mes{}中未出现的最小的非负整数
+            if (mex[j] == 0) {
+                sg[i] = j;
+                break;
+            }
+        }
+    }
+}
+
+// Auti-nim 反尼姆游戏
+// 当先拿完所有石子时候输
+// 当如下条件时，先手必胜
+// ①：所有堆的石子数均=1，且有偶数堆。 
+// ②：至少有一个堆的石子数>1，且石子堆的异或和≠0。
+\end{lstlisting}
+\clearpage\section{分治}
+\subsection{IntegerFastPower}
+\begin{lstlisting}
+ll fpow(ll x, ll k) {
+    ll base = x, r = 1;
+    for (; k; k >>= 1) {
+        if (k & 1) r = r * base;
+        base = base * base;
+    }
+    return r;
+}\end{lstlisting}
+\subsection{MatrixFastPower}
+\begin{lstlisting}
+#define MAX_N 10
+#define mod_num 9973
+
+struct Mat {
+	long long mat[MAX_N][MAX_N];
+	long long n;
+	Mat() {
+		memset(mat, 0, sizeof(mat));
+		n = 0;
+	}
+	Mat(long long n) {
+		memset(mat, 0, sizeof(mat));
+		this->n = n;
+	}
+	void init() {
+		for (int i = 0; i < n; ++i) {
+			mat[i][i] = 1;
+		}
+	}
+	Mat(const long long ** list, long long n) {
+		this->n = n;
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < n; ++j) {
+				mat[i][j] = list[i][j];
+			}
+		}
+	}
+};
+
+Mat operator * (Mat a, Mat b) {
+	long long n = a.n;
+	Mat c(n);
+	memset(c.mat, 0, sizeof(c.mat));
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			for (int k = 0; k < n; ++k) {
+				c.mat[i][j] += (a.mat[i][k] * b.mat[k][j]) % mod_num;
+				c.mat[i][j] %= mod_num;
+			}
+		}
+	}
+	return c;
+}
+
+Mat operator ^ (Mat a, int k) {
+	long long n = a.n;
+	Mat c(n);
+	c.init();
+	for (; k; k >>= 1) {
+		if (k & 1)   c = c * a;
+		a = a * a;
+	}
+	return c;
+}\end{lstlisting}
+\subsection{三维CDQ}
+\begin{lstlisting}
+struct node {
+    // time: 时间 | id: 0,1 是否修改 | f: 正负 | x是下标 | y是权值
+    int time, id, f, x, y;
+};
+
+bool cmp(const node &a, const node &b) {
+    return a.x < b.x;
+}
+
+int ans[N];
+node p[N << 2], et[N << 2];
+
+void cdq(int l, int r) {
+    if (l + 1 == r) return;
+    int mid = (l + r) >> 1;
+    cdq(l, mid), cdq(mid, r);
+    int t = l;
+    for (int i = mid; i < r; i++) {
+        // if edit continue
+        if (p[i].id)continue;
+        for (; t < mid && p[t].x <= p[i].x; t++) {
+            if (p[t].id) tree.change(p[t].y, p[t].f);;
+        }
+        int f = p[i].f;
+        int cnt = tree.query(p[i].y);
+        ans[p[i].time] += f * cnt;
+    }
+    // 逆操作p[t].y
+    while (--t >= l) {
+        if (p[t].id) tree.change(p[t].y, -p[t].f);
+    }
+    // 归并排序
+    int t1 = l, t2 = mid, k = 0;
+    while (t1 < mid && t2 < r) {
+        et[k++] = p[t1].x < p[t2].x ? p[t1++] : p[t2++];
+    }
+    copy(p + t1, p + mid, et + k);
+    copy(p + t2, p + r, et + k);
+    copy(et, et + (r - l), p + l);
+}\end{lstlisting}
+\subsection{树分治-点分治}
+\begin{lstlisting}
+// 题意: n个节点的树，存在边权，范围1e18
+// 求任意两点之间点集的子集中两点之间路径异或和为0的个数
+// u<v,u'<v',(u',v') ∈ path(u,v),求path(u', v')异或和==0
+
+struct Edge {
+    int to, nxt;
+    ll w;
+};
+const int N = int(1e5 + 10);
+const int M = N << 1;
+
+struct Grahp {
+    int head[N];
+    Edge eg[M];
+    int tot;
+
+    void init(int n) {
+        memset(head, -1, sizeof(int) * ++n);
+    }
+
+    inline void addEdge(int u, int v, ll w) {
+        eg[tot] = {v, head[u], w};
+        head[u] = tot++;
+    }
+} gh;
+
+bool vis[N];
+// q队列, fa祖先, sz是子树大小, smx是子树最大
+int q[N], fa[N], sz[N], smx[N];
+
+int froot(int s) {
+    int l, r, mn = N, rt = 0;
+    q[l = r = 1] = s;
+    while (l <= r) {
+        int u = q[l++];
+        sz[u] = 1;
+        smx[u] = 0;
+        for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+            int v = gh.eg[i].to;
+            if (v == fa[u] || vis[v]) continue;
+            fa[v] = u;
+            q[++r] = v;
+        }
+    }
+    // 反向遍历所有点算size
+    while (--l) {
+        int u = q[l];
+        int mx = max(smx[u], r - sz[u]);
+        if (mx < mn) mn = mx, rt = u;
+        if (l == 1) break; // 根节点没有fa
+        sz[fa[u]] += sz[u];
+        smx[fa[u]] = max(smx[fa[u]], sz[u]);
+    }
+    return rt;
+}
+
+// sons子树方向节点个数, val根到该节点异或和, gc边后继方向的节点个数
+int sons[N], gc[M];
+ll val[N];
+ll ans = 0;
+int n;
+
+const int MOD = int(1e9 + 7);
+
+ll nums[N];
+int cnt[N];
+
+void go(int s, int rt) {
+    fa[s] = rt;
+    val[s] = 0;
+    int l, r;
+    // 不计算s
+    q[l = r = 0] = s;
+    int m = 0;
+    while (l <= r) {
+        int u = q[l++];
+        nums[m++] = val[u];
+        for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+            int v = gh.eg[i].to;
+            if (v == fa[u] || vis[v]) continue;
+            fa[v] = u;
+            q[++r] = v;
+            val[v] = val[u] ^ gh.eg[i].w;
+            // 这个点方向后面有多少点
+            sons[v] = gc[i];
+        }
+    }
+    sort(nums, nums + m);
+    m = unique(nums, nums + m) - nums;
+    mst(cnt, 0, m);
+    // 遍历分支
+    for (int j = gh.head[s]; ~j; j = gh.eg[j].nxt) {
+        // 分支的根
+        int du = gh.eg[j].to;
+        if (vis[du]) continue;
+        q[l = r = 1] = du;
+        while (l <= r) {
+            int u = q[l++];
+            int k = lower_bound(nums, nums + m, val[u]) - nums;
+            (ans += 1ll * sons[u] * cnt[k] % MOD) %= MOD;
+            if (val[u] == 0) {
+                (ans += 1ll * sons[u] * (n - gc[j]) % MOD) %= MOD;
+            }
+            for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+                int v = gh.eg[i].to;
+                if (v == fa[u] || vis[v]) continue;
+                q[++r] = v;
+            }
+        }
+        // 增加这个方向的值
+        while (--l) {
+            int u = q[l];
+            int k = lower_bound(nums, nums + m, val[u]) - nums;
+            (cnt[k] += sons[u]) %= MOD;
+        }
+    }
+}
+
+void work(int u) {
+    // 换根
+    u = froot(u);
+    vis[u] = true;
+    go(u, 0);
+    for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+        int v = gh.eg[i].to;
+        if (vis[v]) continue;
+        work(v);
+    }
+}
+
+// 预处理边后继节点个数
+int pdfs(int u, int f) {
+    int fg_id = -1;
+    int s = 1;
+    for (int i = gh.head[u]; ~i; i = gh.eg[i].nxt) {
+        int v = gh.eg[i].to;
+        if (v == f) { // 记录父边ID
+            fg_id = i;
+            continue;
+        }
+        int c = pdfs(v, u);
+        gc[i] = c;
+        s += c;
+    }
+    // 存在父边
+    if (~fg_id) gc[fg_id] = n - s;
+    return s;
+}
+
+void solve() {
+    while (cin >> n) {
+        gh.init(n);
+        for (int i = 2; i <= n; i++) {
+            int u, v;
+            ll w;
+            u = i;
+            cin >> v >> w;
+            gh.addEdge(u, v, w);
+            gh.addEdge(v, u, w);
+        }
+        mst(vis, false, n + 1);
+        pdfs(1, 0);
+        ans = 0;
+        work(1);
+        cout << ans << endl;
+    }
+}\end{lstlisting}
+\clearpage\section{数论}
+\subsection{线性基}
+\begin{lstlisting}
+#define rep(i, l, r) for(int i=(l);i<(r);++i)
+#define per(i, l, r) for(int i=(r)-1;i>=(l);--i)
+#define pw(x) (1ll << (x))
+#define bt(x, i) ((x >> i) & 1)
+const int LN = 61;
+struct LB {
+    ll d[LN] = {0}, p[LN] = {0};
+    int g[LN] = {0};
+    int cnt = 0;
+
+    LB() = default;
+
+    ll &operator[](int pos) {
+        return d[pos];
+    }
+
+    const ll &operator[](int pos) const {
+        return d[pos];
+    }
+
+    void insert(ll val, int pos) {
+        per(i, 0, LN) {
+            if (val & pw(i)) {
+                if (!d[i]) {
+                    d[i] = val;
+                    g[i] = pos;
+                    return;
+                }
+				// 贪心保留最右
+                if (pos > g[i]) {
+                    swap(pos, g[i]);
+                    swap(val, d[i]);
+                }
+                val ^= d[i];
+            }
+        }
+    }
+
+    ll query_max(int l) {
+        ll ret = 0;
+        per(i, 0, LN) {
+            if (g[i] >= l)
+                ret = max(ret, ret ^ d[i]);
+        }
+        return ret;
+    }
+
+    ll query_max() {
+        ll ret = 0;
+        per(i, 0, LN) {
+            ret = max(ret, ret ^ d[i]);
+        }
+        return ret;
+    }
+
+    ll query_min() {
+        rep(i, 0, LN) {
+            if (d[i]) return d[i];
+        }
+        return 0;
+    }
+	
+	bool test(ll x) const {
+        per(i, 0, LN) {
+            if (bt(x, i)) {
+                if (!d[i]) return false;
+                x ^= d[i];
+            }
+        }
+        return true;
+    }
+
+    void rebuild() {
+        per(i, 0, LN) {
+            per(j, 0, i) {
+                if (d[i] & (1LL << j)) d[i] ^= d[j];
+            }
+        }
+        rep(i, 0, LN) {
+            if (d[i]) p[cnt++] = d[i];
+        }
+    }
+
+    ll kth_query(ll k) {
+        int ret = 0;
+        if (k >= pw(cnt)) return -1;
+        per(i, 0, LN) {
+            if (bt(k, 1)) ret ^= p[i];
+        }
+        return ret;
+    }
+};
+// 求并集
+LB operator+(const LB &n1, const LB &n2) {
+    LB ret = n1;
+    per(i, 0, LN)
+        if (n2.d[i])
+            ret.insert(n1.d[i], n1.g[i]);
+    return ret;
+}
+// 求交集
+LB operator^(const LB &n1, const LB &n2) {
+    LB ans = {}, c = n2, d = n2;
+    rep(i, 0, LN) {
+        ll x = n1[i];
+        if (!x) continue;
+        int p = i;
+        ll T = 0;
+        per(j, 0, p + 1) {
+            if (bt(x, j)) {
+                if (c[j]) {
+                    x ^= c[j];
+                    T ^= d[j];
+                } else {
+                    p = j;
+                    break;
+                }
+            }
+        }
+        if (!x) {
+            ans[i] = T;
+        } else {
+            c[p] = x;
+            d[p] = T;
+        }
+    }
+    return ans;
+}\end{lstlisting}
+\subsection{FWT}
+\begin{lstlisting}
+void FWT(int p[], int n) { // 如果要取模运算记得-x+MOD,*inv
+    for (int i = 1; i < n; i <<= 1) {
+        for (int j = 0; j < n; j += (i << 1)) {
+            for (int k = 0; k < i; k++) {
+                // or{
+                p[i + j + k] += +p[j + k];
+                // and
+                p[j + k] += p[i + j + k];
+                // xor
+                tie(p[j + k], p[i + j + k]) = make_pair(p[j + k] + p[i + j + k], p[j + k] - p[i + j + k]);
+            }
+        }
+    }
+}
+
+void IFWT(int p[], int n) { // 如果要取模运算记得-x+MOD,*inv
+    for (int i = 1; i < n; i <<= 1) {
+        for (int j = 0; j < n; j += (i << 1)) {
+            for (int k = 0; k < i; k++) {
+                // or
+                p[i + j + k] -= p[j + k];
+                // and
+                p[j + k] -= p[i + j + k];
+                // xor
+                tie(p[j + k], p[i + j + k]) = make_pair(p[j + k] + p[i + j + k], p[j + k] - p[i + j + k]);
+                p[j + k] = p[j + k] / 2, p[i + j + k] = p[i + j + k] / 2;
+            }
+        }
+    }
+}\end{lstlisting}
+\subsection{FFT}
+\begin{lstlisting}
+inline int lowbit(int x) { return x & -x; }
+
+int calc(int n) {
+    int k = 0;
+    while ((1 << k) < n) k++;
+    return k;
+}
+
+// FFT
+const double pi = acos(-1.0);
+
+const int N = (1 << 20);
+using Complex = complex<double>;
+
+void change(Complex p[], int n) {
+    int k = calc(n);
+    n = 1 << k;
+    vector<int> r(n, 0);
+    for (int i = 0; i < n; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (k - 1));
+    for (int i = 0; i < n; i++) if (i < r[i]) swap(p[i], p[r[i]]);
+}
+
+void FFT(Complex p[], int n, int type) {
+    change(p, n);
+    for (int mid = 1; mid < n; mid <<= 1) { //待合并区间的长度的一半
+        Complex wn(cos(pi / mid), type * sin(pi / mid)); //单位根
+        for (int R = mid << 1, j = 0; j < n; j += R) { //R是区间的长度，j表示前已经到哪个位置了
+            Complex w(1, 0); //幂
+            for (int k = 0; k < mid; k++, w = w * wn) { //枚举左半部分
+                Complex x = p[j + k], y = w * p[j + mid + k]; //蝴蝶效应
+                p[j + k] = x + y;
+                p[j + mid + k] = x - y;
+            }
+        }
+    }
+}\end{lstlisting}
+\subsection{圆上整点}
+\begin{lstlisting}
+// x^2+y^2=r^2 --> y^2=(r-x)*(r+x)
+// d = gcd(r-x,r+x), n=(r-x)/d, m=(r+x)/d, y^2=d^2*m*n
+// 因为y^2和d^2为完全平方数，所以 n*m 为完全平方数
+// 又因为n,m互质，所以 n=u^2, m =v^2
+// 所以 r-y=d*u^2, r+y=d*v^2
+// 可得 x=d*(v^2-u^2), y=d*u*v
+
+ll gcd(ll a, ll b) { return !b ? a : gcd(b, a % b); }
+
+inline int work(vector<pll> &p, ll d, ll t) { // d * t == 2 * r
+    int sum = 0;
+    for (ll u = 1; 2 * u * u < t; u++) {
+        ll v = ll(sqrt(t - u * u));
+        if (v == u || v * v + u * u != t || gcd(u, v) != 1) continue;
+        ll x = d * (v * v - u * u) / 2;
+        ll y = d * u * v;
+        p.push_back({x, y});
+        sum++;
+    }
+    return sum;
+}
+
+int calc(vector<pll> &p, ll r) {
+    int sum = 0;
+    r <<= 1;
+    for (ll i = 1; i * i <= r; i++) { // sqrt 枚举因子
+        if (r % i) continue;
+        sum += work(p, i, r / i);
+        if (i * i < r) sum += work(p, r / i, i);
+    }
+    for (int i = 0, cnt = p.size(); i < cnt; i++) {
+        int x = p[i].fi, y = p[i].se;
+        p.push_back({x, -y}), p.push_back({-x, y}), p.push_back({-x, -y});
+    }
+    sum <<= 2;
+    r >>= 1;
+    sum += 4;
+    p.push_back({r, 0}), p.push_back({-r, 0}), p.push_back({0, r}), p.push_back({0, -r});
+    sort(p.begin(), p.end());
+    return sum;
+}\end{lstlisting}
+\clearpage\section{其他}
+\subsection{BigInteger}
+\begin{lstlisting}
+// base and base_digits must be consistent
+constexpr int base = 1000000000;
+constexpr int base_digits = 9;
+
+struct bigint {
+    // value == 0 is represented by empty z
+    vector<int> z; // digits
+
+    // sign == 1 <==> value >= 0
+    // sign == -1 <==> value < 0
+    int sign;
+
+    bigint() : sign(1) {}
+
+    bigint(ll v) { *this = v; }
+
+    bigint &operator=(ll v) {
+        sign = v < 0 ? -1 : 1;
+        v *= sign;
+        z.clear();
+        for (; v > 0; v = v / base) z.push_back((int) (v % base));
+        return *this;
+    }
+
+    bigint(const string &s) { read(s); }
+
+    bigint &operator+=(const bigint &other) {
+        if (sign == other.sign) {
+            for (int i = 0, carry = 0; i < other.z.size() || carry; ++i) {
+                if (i == z.size())
+                    z.push_back(0);
+                z[i] += carry + (i < other.z.size() ? other.z[i] : 0);
+                carry = z[i] >= base;
+                if (carry)
+                    z[i] -= base;
+            }
+        } else if (other != 0 /* prevent infinite loop */) {
+            *this -= -other;
+        }
+        return *this;
+    }
+
+    friend bigint operator+(bigint a, const bigint &b) { return a += b; }
+
+    bigint &operator-=(const bigint &other) {
+        if (sign == other.sign) {
+            if (sign == 1 && *this >= other || sign == -1 && *this <= other) {
+                for (int i = 0, carry = 0; i < other.z.size() || carry; ++i) {
+                    z[i] -= carry + (i < other.z.size() ? other.z[i] : 0);
+                    carry = z[i] < 0;
+                    if (carry)
+                        z[i] += base;
+                }
+                trim();
+            } else {
+                *this = other - *this;
+                this->sign = -this->sign;
+            }
+        } else {
+            *this += -other;
+        }
+        return *this;
+    }
+
+    friend bigint operator-(bigint a, const bigint &b) {
+        return a -= b;
+    }
+
+    bigint &operator*=(int v) {
+        if (v < 0) sign = -sign, v = -v;
+        for (int i = 0, carry = 0; i < z.size() || carry; ++i) {
+            if (i == z.size()) z.push_back(0);
+            ll cur = (ll) z[i] * v + carry;
+            carry = (int) (cur / base);
+            z[i] = (int) (cur % base);
+        }
+        trim();
+        return *this;
+    }
+
+    bigint operator*(int v) const { return bigint(*this) *= v; }
+
+    friend pair<bigint, bigint> divmod(const bigint &a1, const bigint &b1) {
+        int norm = base / (b1.z.back() + 1);
+        bigint a = a1.abs() * norm;
+        bigint b = b1.abs() * norm;
+        bigint q, r;
+        q.z.resize(a.z.size());
+
+        for (int i = (int) a.z.size() - 1; i >= 0; i--) {
+            r *= base;
+            r += a.z[i];
+            int s1 = b.z.size() < r.z.size() ? r.z[b.z.size()] : 0;
+            int s2 = b.z.size() - 1 < r.z.size() ? r.z[b.z.size() - 1] : 0;
+            int d = (int) (((ll) s1 * base + s2) / b.z.back());
+            r -= b * d;
+            while (r < 0) r += b, --d;
+            q.z[i] = d;
+        }
+
+        q.sign = a1.sign * b1.sign;
+        r.sign = a1.sign;
+        q.trim();
+        r.trim();
+        return {q, r / norm};
+    }
+
+    friend bigint sqrt(const bigint &a1) {
+        bigint a = a1;
+        while (a.z.empty() || a.z.size() % 2 == 1) a.z.push_back(0);
+
+        int n = a.z.size();
+
+        int firstDigit = (int) ::sqrt((double) a.z[n - 1] * base + a.z[n - 2]);
+        int norm = base / (firstDigit + 1);
+        a *= norm;
+        a *= norm;
+        while (a.z.empty() || a.z.size() % 2 == 1) a.z.push_back(0);
+
+        bigint r = (ll) a.z[n - 1] * base + a.z[n - 2];
+        firstDigit = (int) ::sqrt((double) a.z[n - 1] * base + a.z[n - 2]);
+        int q = firstDigit;
+        bigint res;
+
+        for (int j = n / 2 - 1; j >= 0; j--) {
+            for (;; --q) {
+                bigint r1 = (r - (res * 2 * base + q) * q) * base * base +
+                            (j > 0 ? (ll) a.z[2 * j - 1] * base + a.z[2 * j - 2] : 0);
+                if (r1 >= 0) {
+                    r = r1;
+                    break;
+                }
+            }
+            (res *= base) += q;
+
+            if (j > 0) {
+                int d1 = res.z.size() + 2 < r.z.size() ? r.z[res.z.size() + 2] : 0;
+                int d2 = res.z.size() + 1 < r.z.size() ? r.z[res.z.size() + 1] : 0;
+                int d3 = res.z.size() < r.z.size() ? r.z[res.z.size()] : 0;
+                q = (int) (((ll) d1 * base * base + (ll) d2 * base + d3) / (firstDigit * 2));
+            }
+        }
+
+        res.trim();
+        return res / norm;
+    }
+
+    bigint operator/(const bigint &v) const {
+        return divmod(*this, v).first;
+    }
+
+    bigint operator%(const bigint &v) const {
+        return divmod(*this, v).second;
+    }
+
+    bigint &operator/=(int v) {
+        if (v < 0) sign = -sign, v = -v;
+        for (int i = (int) z.size() - 1, rem = 0; i >= 0; --i) {
+            ll cur = z[i] + rem * (ll) base;
+            z[i] = (int) (cur / v);
+            rem = (int) (cur % v);
+        }
+        trim();
+        return *this;
+    }
+
+    bigint operator/(int v) const {
+        return bigint(*this) /= v;
+    }
+
+    int operator%(int v) const {
+        if (v < 0) v = -v;
+        int m = 0;
+        for (int i = (int) z.size() - 1; i >= 0; --i)
+            m = (int) ((z[i] + m * (ll) base) % v);
+        return m * sign;
+    }
+
+    bigint &operator*=(const bigint &v) {
+        return *this = *this * v;;
+    }
+
+    bigint &operator/=(const bigint &v) {
+        return *this = *this / v;
+    }
+
+    bool operator<(const bigint &v) const {
+        if (sign != v.sign)
+            return sign < v.sign;
+        if (z.size() != v.z.size())
+            return z.size() * sign < v.z.size() * v.sign;
+        for (int i = (int) z.size() - 1; i >= 0; i--)
+            if (z[i] != v.z[i])
+                return z[i] * sign < v.z[i] * sign;
+        return false;
+    }
+
+    bool operator>(const bigint &v) const { return v < *this; }
+
+    bool operator<=(const bigint &v) const { return !(v < *this); }
+
+    bool operator>=(const bigint &v) const { return !(*this < v); }
+
+    bool operator==(const bigint &v) const { return !(*this < v) && !(v < *this); }
+
+    bool operator!=(const bigint &v) const { return *this < v || v < *this; }
+
+    void trim() {
+        while (!z.empty() && z.back() == 0) z.pop_back();
+        if (z.empty()) sign = 1;
+    }
+
+    bool isZero() const {
+        return z.empty();
+    }
+
+    friend bigint operator-(bigint v) {
+        if (!v.z.empty()) v.sign = -v.sign;
+        return v;
+    }
+
+    bigint abs() const {
+        return sign == 1 ? *this : -*this;
+    }
+
+    ll longValue() const {
+        ll res = 0;
+        for (int i = (int) z.size() - 1; i >= 0; i--)
+            res = res * base + z[i];
+        return res * sign;
+    }
+
+    friend bigint gcd(const bigint &a, const bigint &b) {
+        return b.isZero() ? a : gcd(b, a % b);
+    }
+
+    friend bigint lcm(const bigint &a, const bigint &b) {
+        return a / gcd(a, b) * b;
+    }
+
+    void read(const string &s) {
+        sign = 1;
+        z.clear();
+        int pos = 0;
+        while (pos < s.size() && (s[pos] == '-' || s[pos] == '+')) {
+            if (s[pos] == '-') sign = -sign;
+            ++pos;
+        }
+        for (int i = (int) s.size() - 1; i >= pos; i -= base_digits) {
+            int x = 0;
+            for (int j = max(pos, i - base_digits + 1); j <= i; j++)
+                x = x * 10 + s[j] - '0';
+            z.push_back(x);
+        }
+        trim();
+    }
+
+    friend istream &operator>>(istream &stream, bigint &v) {
+        string s;
+        stream >> s;
+        v.read(s);
+        return stream;
+    }
+
+    friend ostream &operator<<(ostream &stream, const bigint &v) {
+        if (v.sign == -1)
+            stream << '-';
+        stream << (v.z.empty() ? 0 : v.z.back());
+        for (int i = (int) v.z.size() - 2; i >= 0; --i)
+            stream << setw(base_digits) << setfill('0') << v.z[i];
+        return stream;
+    }
+
+    static vector<int> convert_base(const vector<int> &a, int old_digits, int new_digits) {
+        vector<ll> p(max(old_digits, new_digits) + 1);
+        p[0] = 1;
+        for (int i = 1; i < p.size(); i++)
+            p[i] = p[i - 1] * 10;
+        vector<int> res;
+        ll cur = 0;
+        int cur_digits = 0;
+        for (int v : a) {
+            cur += v * p[cur_digits];
+            cur_digits += old_digits;
+            while (cur_digits >= new_digits) {
+                res.push_back(int(cur % p[new_digits]));
+                cur /= p[new_digits];
+                cur_digits -= new_digits;
+            }
+        }
+        res.push_back((int) cur);
+        while (!res.empty() && res.back() == 0) res.pop_back();
+        return res;
+    }
+
+    typedef vector<ll> vll;
+
+    static vll karatsubaMultiply(const vll &a, const vll &b) {
+        int n = a.size();
+        vll res(n + n);
+        if (n <= 32) {
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    res[i + j] += a[i] * b[j];
+            return res;
+        }
+
+        int k = n >> 1;
+        vll a1(a.begin(), a.begin() + k);
+        vll a2(a.begin() + k, a.end());
+        vll b1(b.begin(), b.begin() + k);
+        vll b2(b.begin() + k, b.end());
+
+        vll a1b1 = karatsubaMultiply(a1, b1);
+        vll a2b2 = karatsubaMultiply(a2, b2);
+
+        for (int i = 0; i < k; i++) a2[i] += a1[i];
+        for (int i = 0; i < k; i++) b2[i] += b1[i];
+
+        vll r = karatsubaMultiply(a2, b2);
+        for (int i = 0; i < a1b1.size(); i++) r[i] -= a1b1[i];
+        for (int i = 0; i < a2b2.size(); i++) r[i] -= a2b2[i];
+
+        for (int i = 0; i < r.size(); i++) res[i + k] += r[i];
+        for (int i = 0; i < a1b1.size(); i++) res[i] += a1b1[i];
+        for (int i = 0; i < a2b2.size(); i++) res[i + n] += a2b2[i];
+        return res;
+    }
+
+    bigint operator*(const bigint &v) const {
+        vector<int> a6 = convert_base(this->z, base_digits, 6);
+        vector<int> b6 = convert_base(v.z, base_digits, 6);
+        vll a(a6.begin(), a6.end());
+        vll b(b6.begin(), b6.end());
+        while (a.size() < b.size()) a.push_back(0);
+        while (b.size() < a.size()) b.push_back(0);
+        while (a.size() & (a.size() - 1)) a.push_back(0), b.push_back(0);
+        vll c = karatsubaMultiply(a, b);
+        bigint res;
+        res.sign = sign * v.sign;
+        for (int i = 0, carry = 0; i < c.size(); i++) {
+            ll cur = c[i] + carry;
+            res.z.push_back((int) (cur % 1000000));
+            carry = (int) (cur / 1000000);
+        }
+        res.z = convert_base(res.z, 6, base_digits);
+        res.trim();
+        return res;
+    }
+};
+\end{lstlisting}
+\subsection{FastIO}
+\begin{lstlisting}
+/*
+ * FastIO
+ * 代码模板 !
+ * 如有雷同 !
+ * 纯属巧合 !
+ */
+namespace FastIO {
+#define BUF_SIZE 10000000
+#define OUT_SIZE 10000000
+#define ll long long
+    //fread->read
+    bool IOerror = 0;
+
+    inline char nc() {
+        static char buf[BUF_SIZE], *p1 = buf + BUF_SIZE, *pend = buf + BUF_SIZE;
+        if (p1 == pend) {
+            p1 = buf;
+            pend = buf + fread(buf, 1, BUF_SIZE, stdin);
+            if (pend == p1) {
+                IOerror = 1;
+                return -1;
+            }
+            //{printf("IO error!\n");system("pause");for (;;);exit(0);}
+        }
+        return *p1++;
+    }
+
+    inline bool blank(char ch) { return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t'; }
+
+    inline void read(int &x) {
+        bool sign = 0;
+        char ch = nc();
+        x = 0;
+        for (; blank(ch); ch = nc());
+        if (IOerror)return;
+        if (ch == '-')sign = 1, ch = nc();
+        for (; ch >= '0' && ch <= '9'; ch = nc())x = x * 10 + ch - '0';
+        if (sign)x = -x;
+    }
+
+    inline void read(ll &x) {
+        bool sign = 0;
+        char ch = nc();
+        x = 0;
+        for (; blank(ch); ch = nc());
+        if (IOerror)return;
+        if (ch == '-')sign = 1, ch = nc();
+        for (; ch >= '0' && ch <= '9'; ch = nc())x = x * 10 + ch - '0';
+        if (sign)x = -x;
+    }
+
+    inline void read(double &x) {
+        bool sign = 0;
+        char ch = nc();
+        x = 0;
+        for (; blank(ch); ch = nc());
+        if (IOerror)return;
+        if (ch == '-')sign = 1, ch = nc();
+        for (; ch >= '0' && ch <= '9'; ch = nc())x = x * 10 + ch - '0';
+        if (ch == '.') {
+            double tmp = 1;
+            ch = nc();
+            for (; ch >= '0' && ch <= '9'; ch = nc())tmp /= 10.0, x += tmp * (ch - '0');
+        }
+        if (sign)x = -x;
+    }
+
+    inline void read(char *s) {
+        char ch = nc();
+        for (; blank(ch); ch = nc());
+        if (IOerror)return;
+        for (; !blank(ch) && !IOerror; ch = nc())*s++ = ch;
+        *s = 0;
+    }
+
+    inline void read(char &c) {
+        for (c = nc(); blank(c); c = nc());
+        if (IOerror) {
+            c = -1;
+            return;
+        }
+    }
+
+    //fwrite->write
+    struct Ostream_fwrite {
+        char *buf, *p1, *pend;
+        Ostream_fwrite() {
+            buf = new char[OUT_SIZE];
+            p1 = buf;
+            pend = buf + OUT_SIZE;
+        }
+        void out(char ch) {
+            if (p1 == pend) {
+                fwrite(buf, 1, OUT_SIZE, stdout);
+                p1 = buf;
+            }
+            *p1++ = ch;
+        }
+        void print(int x) {
+            static char s[15], *s1;
+            s1 = s;
+            if (!x)*s1++ = '0';
+            if (x < 0)out('-'), x = -x;
+            while (x)*s1++ = x % 10 + '0', x /= 10;
+            while (s1-- != s)out(*s1);
+        }
+        void println(int x) {
+            static char s[15], *s1;
+            s1 = s;
+            if (!x)*s1++ = '0';
+            if (x < 0)out('-'), x = -x;
+            while (x)*s1++ = x % 10 + '0', x /= 10;
+            while (s1-- != s)out(*s1);
+            out('\n');
+        }
+        void print(ll x) {
+            static char s[25], *s1;
+            s1 = s;
+            if (!x)*s1++ = '0';
+            if (x < 0)out('-'), x = -x;
+            while (x)*s1++ = x % 10 + '0', x /= 10;
+            while (s1-- != s)out(*s1);
+        }
+        void println(ll x) {
+            static char s[25], *s1;
+            s1 = s;
+            if (!x)*s1++ = '0';
+            if (x < 0)out('-'), x = -x;
+            while (x)*s1++ = x % 10 + '0', x /= 10;
+            while (s1-- != s)out(*s1);
+            out('\n');
+        }
+        void print(double x, int y) {
+            static ll mul[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000,
+                               1000000000, 10000000000LL, 100000000000LL, 1000000000000LL, 10000000000000LL,
+                               100000000000000LL, 1000000000000000LL, 10000000000000000LL, 100000000000000000LL};
+            if (x < -1e-12)out('-'), x = -x;
+            x *= mul[y];
+            ll x1 = (ll) floor(x);
+            if (x - floor(x) >= 0.5)++x1;
+            ll x2 = x1 / mul[y], x3 = x1 - x2 * mul[y];
+            print(x2);
+            if (y > 0) {
+                out('.');
+                for (size_t i = 1; i < y && x3 * mul[i] < mul[y]; out('0'), ++i);
+                print(x3);
+            }
+        }
+        void println(double x, int y) {
+            print(x, y);
+            out('\n');
+        }
+        void print(char *s) { while (*s)out(*s++); }
+        void println(char *s) {
+            while (*s)out(*s++);
+            out('\n');
+        }
+        void flush() {
+            if (p1 != buf) {
+                fwrite(buf, 1, p1 - buf, stdout);
+                p1 = buf;
+            }
+        }
+        ~Ostream_fwrite() { flush(); }
+    } Ostream;
+    inline void print(int x) { Ostream.print(x); }
+    inline void println(int x) { Ostream.println(x); }
+    inline void print(char x) { Ostream.out(x); }
+    inline void println(char x) {
+        Ostream.out(x);
+        Ostream.out('\n');
+    }
+    inline void print(ll x) { Ostream.print(x); }
+    inline void println(ll x) { Ostream.println(x); }
+    inline void print(double x, int y) { Ostream.print(x, y); }
+    inline void println(double x, int y) { Ostream.println(x, y); }
+    inline void print(char *s) { Ostream.print(s); }
+    inline void println(char *s) { Ostream.println(s); }
+    inline void println() { Ostream.out('\n'); }
+    inline void flush() { Ostream.flush(); }
+};
+using namespace FastIO;\end{lstlisting}
+\subsection{InputOutputSpeedUp}
+\begin{lstlisting}
+
+
+template <class T>
+inline bool read(T &x) {
+    x = 0;
+    char c = getchar();
+	if(c == EOF) return false;
+    bool f = false;
+    for (; !isdigit(c); c = getchar()) f ^= (c == '-');
+    for (; isdigit(c); c = getchar()) x = x * 10 + (c - '0');
+    x = f ? -x : x;
+	return true;
+}
+ 
+template <class T>
+inline void write(T x) {
+    if (x < 0) {
+        putchar('-');
+        x = -x;
+    }
+    T y = 1;
+    int len = 1;
+    for (; y <= x / 10; y *= 10) ++len;
+    for (; len; --len, x %= y, y /= 10) putchar(x / y + '0');
+}\end{lstlisting}
+\subsection{gcd}
+\begin{lstlisting}
+ll gcd(ll x, ll y) { // 循环版
+	ll t;
+	while (y){
+		t = x % y;
+		x = y;
+		y = t;
+	}
+	return  x;
+}
+
+ll gcd(ll a, ll b) { // 递归版
+    return b == 0 ? a : gcd(b, a % b);
+}
+
+// 扩展欧几里得
+ll exgcd(ll a, ll b, ll &x, ll &y) {
+    if (b == 0) {
+        x = 1, y = 0;
+        return a;
+    }
+    ll q = exgcd(b, a % b, y, x);
+    y -= a / b * x;
+    return q;
+}\end{lstlisting}
+\subsection{myItoa}
+\begin{lstlisting}
+char * myItoa(int value, char* result, int base = 10);
+
+char * myItoa(int value, char* result, int base) {
+	// check that the base if valid  
+
+	if (base < 2 || base > 16) { *result = 0; return result; }
+	char* out = result;
+	int quotient = abs(value);
+	do {
+		const int tmp = quotient / base;
+		*out = "0123456789abcdef"[quotient - (tmp*base)];
+		++out;
+		quotient = tmp;
+	} while (quotient);
+	// Apply negative sign  
+	if (value < 0) *out++ = '-';
+	std::reverse(result, out);
+	*out = 0;
+	return result;
+}\end{lstlisting}
+\subsection{Permutation}
+\begin{lstlisting}
+// 错排问题
+// D(n) = n! [(-1)^2/2! + … + (-1)^(n-1)/(n-1)! + (-1)^n/n!].
+long long table[1000] = {0, 0, 1};
+void init() {
+    for (int i = 3; i <= 20; i++) {
+        table[i] = (i - 1) * (table[i - 1] + table[i - 2]);
+    }
+}\end{lstlisting}
+\subsection{prime}
+\begin{lstlisting}
+// 普通素数筛
+const int PMAX = 1000000;
+
+int prime_count = 0;
+bool prime_list[PMAX] = { false };//元素值为0代表是素数
+int prime_table[PMAX] = { 0 };
+
+void initPrime() {
+    for (int i = 2; i < PMAX; i++) {
+        if (!prime_list[i])
+            prime_table[prime_count++] = i;
+        for (int j = 0, e = (PMAX - 1) / i;
+             j < prime_count && prime_table[j] <= e; j++) {
+            prime_list[i * prime_table[j]] = true;
+            if (i % prime_table[j] == 0) break;
+        }
+    }
+}
+
+
+// 可以得到其中一个质因子的素数筛
+const int PMAX = 1000005;
+
+int prime_count = 0;
+int prime_list[PMAX] = {0}; //元素值为0代表是素数
+int prime_table[PMAX] = {0};
+
+void initPrime() {
+    for (int i = 2; i < PMAX; i++) {
+        if (!prime_list[i])
+            prime_list[i] = prime_table[prime_count++] = i;
+        for (int j = 0, e = (PMAX - 1) / i, now;
+             j < prime_count && prime_table[j] <= e; j++) {
+            prime_list[i * now] = now;
+            if (i % now == 0) break;
+        }
+    }
+}\end{lstlisting}
+\subsection{Hash}
+\begin{lstlisting}
+struct Hash {
+    int num[N];
+    int tot;
+
+    void init() { tot = 0; }
+
+    void insert(int x) { num[tot++] = x; }
+
+    void build() {
+        sort(num, num + tot);
+        tot = unique(num, num + tot) - num;
+    }
+
+    inline int operator[](int x) { return lower_bound(num, num + tot, x) - num; }
+} hs;\end{lstlisting}
+
+\end{document}
